@@ -1,0 +1,21 @@
+author: [Johan Eklund, johan@meck.com]
+keywords: [TEIS]
+subtitle: ""
+lang: "en"
+titlepage-color: "4C566A"
+titlepage-text-color: "D8DEE9"
+titlepage-rule-color: "5E81AC"
+titlepage-rule-height: 4
+toc: true
+toc-own-page: true
+numbersections: true
+footnotes-pretty: true
+papersize: a4
+mainfont: "Source Serif Pro"
+sansfont: "Source Sans Pro"
+monofont: "Iosevka"
+bibliography: refs.yaml
+csl: "assets/ieee.csl"
+link-citations: true
+linkReferences: true
+code-block-font-size: \scriptsize

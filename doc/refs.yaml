@@ -1,0 +1,493 @@
+# vim: set foldmarker={{{,}}} foldmethod=marker foldlevel=1 :
+references:
+# Exjob {{{
+
+  - id: wiki_psl
+    title: 'Wikipedia PSL'
+    type: Webpage
+    issued:
+      year: 2021
+      month: 01
+      day: 07
+    URL: "https://en.wikipedia.org/wiki/Property_Specification_Language"
+
+  - id: symbiyosys
+    title: 'SymbiYosys Documentation'
+    type: Webpage
+    issued:
+      year: 2021
+      month: 01
+      day: 07
+    URL: "https://symbiyosys.readthedocs.io/en/latest/"
+
+  - id: yosys
+    title: 'Yosys'
+    type: Webpage
+    issued:
+      year: 2021
+      month: 01
+      day: 07
+    URL: "http://www.clifford.at/yosys/"
+
+  - id: ghdl
+    title: 'GHDL simulator'
+    type: Webpage
+    issued:
+      year: 2021
+      month: 01
+      day: 07
+    URL: "http://ghdl.free.fr/"
+
+  - id: zipCpu_blog
+    title: 'ZipCpu blog'
+    type: Webpage
+    issued:
+      year: 2021
+      month: 01
+      day: 07
+    URL: "https://zipcpu.com/"
+
+  - id: wiki_formal_methods
+    title: 'Wikipedia Formal Methods'
+    type: Webpage
+    issued:
+      year: 2021
+      month: 01
+      day: 07
+    URL: "https://en.wikipedia.org/wiki/Formal_methods"
+
+
+# }}}
+# Own reports {{{
+  - id: mck_c_ind
+    type: techreport
+    author:
+      family: Eklund
+      given: [Johan]
+    title: C Individual Task
+    institution: AGSTU
+    issued:
+      year: 2020
+
+  - id: mck_vhdl2_1a
+    type: techreport
+    author:
+      family: Eklund
+      given: [Johan]
+    title: VHDL2 Task 1a
+    institution: AGSTU
+    issued:
+      year: 2020
+
+  - id: hls_setup
+    title: "HLS Setup guide"
+    type: Webpage
+    Type: manual
+    issued:
+      year: 2020
+      month: 12
+      day: 17
+    URL: "https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/hb/hls/archives/ug-hls-getting-started-18-1.pdf"
+
+# }}}
+# Misc {{{
+
+  - id: max10_clk
+    title: "Intel MAX 10 Clocking and PLL User Guide"
+    Publisher: Intel
+    Type: manual
+    issued:
+      year: 2020
+
+  - id: de10_man
+    title: "DE10-Lite User Manual"
+    Publisher: terasic
+    Type: manual
+    issued:
+      year: 2020
+      month: 6
+      day: 5
+
+  - id: gprof_man
+    title: "GPROF Manual"
+    type: Webpage
+    Type: manual
+    issued:
+      year: 2020
+      month: 12
+      day: 10
+    URL: "https://sourceware.org/binutils/docs/gprof"
+
+  - id: gprof2dot
+    title: 'gprof2dot'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 12
+      day: 10
+    URL: "https://github.com/jrfonseca/gprof2dot"
+
+  - id: dot_lang
+    title: 'graphviz'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 12
+      day: 10
+    URL: "https://graphviz.org/"
+
+# }}}
+# vhdl_2_eng {{{
+
+  - id: wiki_fft
+    title: 'Wikipedia FFT'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 12
+      day: 01
+    URL: "https://en.wikipedia.org/wiki/Fast_Fourier_transform"
+
+  - id: wiki_i2s
+    title: 'Wikipedia I2S'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 12
+      day: 01
+    URL: "https://en.wikipedia.org/wiki/I%C2%B2S"
+
+  - id: zip_fft_formal
+    title: 'FFT Blog post'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 11
+      day: 26
+    URL: "https://zipcpu.com/dsp/2018/10/02/fft.html"
+
+  - id: fphdl
+    title: 'FPHDL VHDL 93 compatible packages'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 11
+      day: 26
+    URL: "https://github.com/FPHDL/fphdl"
+
+  - id: spiral_fft
+    title: 'Spiral software FFT generator'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 11
+      day: 5
+    URL: "http://www.spiral.net/hardware/dftgen.html"
+
+  - id: zip_fft
+    title: 'zip cpu FFT Generator'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 11
+      day: 5
+    URL: "https://zipcpu.com/dsp/2018/10/02/fft.html"
+
+  - id: i2s2_start
+    title: 'i2s2 example code'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 11
+      day: 5
+    URL: "https://www.digikey.com/eewiki/pages/viewpage.action?pageId=85295576"
+
+  - id: fft_win_wiki
+    title: 'Wikipdia windowing'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 11
+      day: 5
+    URL: "https://en.wikipedia.org/wiki/Window_function"
+
+  - id: pmod_i2s2
+    title: 'Pmod I2S2 Reference'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 11
+      day: 5
+    URL: "https://reference.digilentinc.com/reference/pmod/pmodi2s2/reference-manual"
+
+# }}}
+# vhdl2_indv {{{
+
+  - id: haskell_web
+    title: 'Haskell website'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 10
+      day: 31
+    URL: "https://www.haskell.org/"
+
+  - id: clash_web
+    title: 'Clash website'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 10
+      day: 31
+    URL: "https://clash-lang.org/"
+
+# }}}
+# c_eng {{{
+
+  - id: c_vid
+    title: 'Video Presentation'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 10
+      day: 28
+    URL: "https://drive.google.com/file/d/1Pla_gNr3RMJ0EYo7aagagYK3piRvoAhw/view?usp=sharing"
+
+  - id: newlib
+    title: 'Newlib documentation'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 10
+      day: 26
+    URL: "https://sourceware.org/newlib/"
+
+  - id: wiki_uart
+    title: 'Wikipedia UART'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 10
+      day: 26
+    URL: "https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter"
+
+  - id: wiki_nmea
+    title: 'Wikipedia NMEA'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 10
+      day: 26
+    URL: "https://en.wikipedia.org/wiki/NMEA_0183"
+
+  - id: cir_buf
+    title: 'Wikipedia Circular Buffer'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 10
+      day: 25
+    URL: "https://en.wikipedia.org/wiki/Circular_buffer"
+
+# }}}
+# c_individual {{{
+
+  - id: MS-LSP
+    title: 'Microsoft Language Server Protocol'
+    type: Webpage
+    issued:
+      year: 2020
+    URL: "https://microsoft.github.io/language-server-protocol/"
+
+  - id: GnuMake
+    title: 'Wikipedia Gnu Toolchain'
+    type: Webpage
+    issued:
+      year: 2020
+    URL: "https://en.wikipedia.org/wiki/GNU_toolchain"
+
+  - id: emb_dis
+    title: 'Embedded Design Handbook'
+    type: Webpage
+    issued:
+      year: 2020
+    URL: "https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/hb/nios2/edh_ed_handbook.pdf"
+
+  - id: nios2_dev
+    title: 'Nios® II Software Developer Handbook'
+    type: Webpage
+    issued:
+      year: 2020
+    URL: "https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/hb/nios2/n2sw_nii5v2gen2.pdf"
+
+  - id: quart_inst
+    title: 'Intel® FPGA Software Installationand Licensing'
+    type: Webpage
+    issued:
+      year: 2018
+    URL: "https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/manual/archives/quartus_install-18-1.pdf"
+
+# }}}
+# vhdl_course {{{
+
+  - id: vhdl_ismce
+    title: 'In-system Modification of Memory and Constants'
+    type: Webpage
+    issued:
+      year: 2014
+    URL: "https://www.intel.cn/content/dam/www/programmable/us/en/pdfs/literature/hb/qts/qts_qii53012.pdf"
+
+
+  - id: wiki_counter
+    title: 'Wikipedia Counter'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 9
+      day: 12
+    URL: https://en.wikipedia.org/wiki/Counter_(digital)
+
+  - id: vhdl_enum_enc
+    title: 'enum_encoding VHDL Synthesis Attribute'
+    type: Webpage
+    issued:
+      year: 2017
+    URL: "https://www.intel.com/content/www/us/en/programmable/quartushelp/17.0/hdl/vhdl/vhdl_file_dir_enum_encoding.htm"
+
+# }}}
+# C_course {{{
+
+  - id: wiki_linker
+    title: 'Wikipedia'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 9
+      day: 6
+    URL: https://en.wikipedia.org/wiki/Linker_(computing)
+
+  - id: gcc_attr
+    title: 'GCC Manual Attributes'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 9
+      day: 6
+    URL: "https://gcc.gnu.org/onlinedocs/gcc-10.2.0/gcc/Common-Variable-Attributes.html#section"
+
+  - id: nios_inst
+    title: 'NIOS II Instruction Set Reference'
+    type: Webpage
+    issued:
+      year: 2015
+    URL: "https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/hb/nios2/n2cpu_nii51017.pdf"
+
+  - id: nios_ref
+    title: 'NIOS II Reference Guide'
+    type: Webpage
+    issued:
+      year: 2020
+    URL: "https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/hb/nios2/n2cpu-nii5v1gen2.pdf"
+
+  - id: nios_sof_ref
+    title: 'NIOS II Software Build Tools Reference'
+    type: Webpage
+    issued:
+      year: 2014
+    URL: "https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/hb/nios2/n2sw_nii52016.pdf"
+
+
+# }}}
+# Prepkurs {{{
+
+  - id: godbolt_tail
+    title: 'Tail recursive function'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 8
+      day: 12
+    URL: https://godbolt.org/z/fqKheG
+
+  - id: wiki_compiler
+    title: 'Wikipedia'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 8
+      day: 12
+    URL: https://en.wikipedia.org/wiki/Compiler
+
+  - id: wiki_linker
+    title: 'Wikipedia'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 8
+      day: 12
+    URL: https://en.wikipedia.org/wiki/Linker_(computing)
+
+  - id: wiki_micro
+    title: 'Wikipedia'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 7
+      day: 18
+    URL: https://en.wikipedia.org/wiki/Microcontroller
+
+  - id: wiki_ir
+    title: 'Wikipedia'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 7
+      day: 18
+    URL: https://en.wikipedia.org/wiki/Remote_control
+
+  - id: wiki_lcd
+    title: 'Wikipedia'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 7
+      day: 18
+    URL: https://en.wikipedia.org/wiki/Liquid-crystal_display
+
+  - id: wiki_ir
+    title: 'Wikipedia'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 7
+      day: 18
+    URL: https://en.wikipedia.org/wiki/Remote_control
+
+  - id: wiki_radio
+    title: 'Wikipedia'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 7
+      day: 18
+    URL: https://en.wikipedia.org/wiki/Radio
+
+  - id: wiki_dip_switch
+    title: 'Wikipedia'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 7
+      day: 18
+    URL: https://en.wikipedia.org/wiki/dip_switch
+
+  - id: wiki_433
+    title: 'Wikipedia'
+    type: Webpage
+    issued:
+      year: 2020
+      month: 7
+      day: 18
+    URL: https://en.wikipedia.org/wiki/LPD433
+
+# }}}
