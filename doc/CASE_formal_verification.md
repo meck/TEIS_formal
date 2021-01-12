@@ -9,23 +9,22 @@ abstract: |
 
 # Background
 
-TODO
+The promise of formal verification is to be able to mathematically prove
+aspects about a design. These methods can be applied to a design either in a
+construction phase in order to find bugs or as a verification of a completed
+design. It should be noted that the author is a beginner and this an
+exploration and **not authoritative knowledge** in any way. The methods
+described is also only one of many possible techniques for formal verification.
+
+
+TODO More
 
 
 # Theory
 
-The promise of formal verification is to be able to mathematically prove
-aspects about a construction. These methods can be applied to a design either
-in a construction phase in order to find bugs or as a verification of a
-completed design. It should be noted that the author is a beginner and this an
-exploration and **not authoritative knowledge** in any way. The methods
-described is only one of many possible techniques for formal verification.
-
-## Formal Verification.
-
 A HDL design after synthesis can be viewed in its whole as a Finite State
-Machine, completely represented by its current state and its inputs^[including
-any clock and reset signals] as transitions. This can then represent all
+Machine, completely represented by its current state and all its
+inputs^[including any clock] as transitions. This can then represent all
 possible states of a design, probably only some of these states are **valid
 states** where the design works as expected, this is implicit, this state space
 will also contain the designs initial state.
@@ -65,65 +64,170 @@ second step of the prof ($z$-induction), all possible steps must be considered.
 Although the first part may be valuable in itself.
 
 
-## PSL
 
-**P**roperty **S**pecification **L**anguage [@wiki_psl] is _temporal logic_
-i.e. a language constructed for expressing logic over time easily. It is
-available in "flavors" for both VHDL and Verilog, this document uses the VHDL
-flavor.
+## Step 1: BMC
 
-An alternative is "**S**ystem **V**erilog **A**ssertions" for System Verilog,
-which is the primary use case for some of the tools mentioned below^[SVA can
-also be made to work with VHDL but requires extra proprietary tools.].
+**B**ounded **M**odel **C**heck is the first part of the formal proof. The
+solver starts out in the initial state of the design and steps the logic
+forward from there a certain number of steps $k_{bmc}$ (also referred to as the
+depth of the proof). I.e it checks a branching tree of states to see that we
+don't enter a invalid state, see @fig:bmc_1. This proves that **no invalid
+state is reachable within $k_{bmc}$ steps.** However it says nothing about the
+what might happen after that ($k_{bmc}+1$ or $k_{bmc}+n$), in practice this
+step turns out to often be able to find many bugs in itself. Increasing $k$
+makes the operation exponentially larger, so to be able to prove the design
+will never enter a invalid state the next step is used.
+
+![Successfull BMC](bmc_1.png){#fig:bmc_1 width=4cm}
+
+
+## Step 2: $k$-induction
+
+This part can be illustrated in the following way, The solver looks at the
+states that are asserted and invalid, from there it steps "backward" to see if
+it will reach an invalid stage within $k_{ind}$ cycles @fig:ind_1. If this
+holds for all invalid states, this means that **when starting from any valid
+state the following $k_{ind}$ states will always be valid**.
+
+![Successfull induction](ind_1.png){#fig:ind_1 width=4cm}
+
+## Combining step 1 and 2
+
+The matter of combining these two steps is the application of mathematical
+induction[@wiki_ind], where there is a series of statements $P(n)$:
+
+1. Prove that $P(0)$ is true, this is a "base case".
+2. Prove that $P(n+1)$ is true, this is a induction step.
+3. Combining these: If $P(0)$ leads to $P(0+1)$ leads to $P(0+1+1)$ etc. This
+   means that all $P(n)$ where $n \geq 0$ are true.
+
+This is what the tools does; BMC is the base case, the induction step is then
+done with $k_{bmc} \leq k_{ind}$, if this passes the following is known:
+
+1. **no invalid state is reachable within $k_{bmc}$ steps**
+2. **when starting from any valid state the following $k_{ind}$ states will always be valid**
+3. this means that $k_{bmc} + 1$ must be valid and recursively also $k_{bmc} +
+   1 + 1$ etc. So all states reachable^[all possible states excluding assumed
+   invalid states] from the initial state must be valid, I.e. **the design
+   will never enter a invalid state.**
+
+
+## Workflow
+
+The main workflow for these tools can be summarized:
+
+1. **Run Bounded Check**
+   + `FAIL` $\Rightarrow$ Fix design, add assumptions, or loosen asserts
+   + `PASS` $\Rightarrow$ So far so good. Proceed to step 2
+
+2. **Run Induction Proof**
+
+   + `FAIL` $\Rightarrow$ Investigate the produced counterexample: Is it reachable?
+
+      * `REACHABLE` $\Rightarrow$ Fix design, add assumptions, or loosen asserts
+      * `UNREACHABLE` $\Rightarrow$ Add restrictions, strengthen asserts,or increase induction length
+
+   + `PASS` $\Rightarrow$ Do you want more asserts in your design?
+
+      * `YES` $\Rightarrow$  Reduce induction length or remove restrictions.
+      * `NO` $\Rightarrow$ You are done.
+
+### Assert/Assume
+
+When constructing a formal proof for a design the main tools are **assertions**
+and **assumptions**. The rule for how to use these are if the design is viewed
+from the top level:
+
+   - **Assert outputs and internal state** The description of the correct
+     functionality of the design.
+   - **Assume inputs** Remove inputs that are known to never happen.
+     If to much is assumed, the design might pass and still
+     have errors^[Or the saying "Assumptions are the mother of all F***ups"].
+
+### Depth
+
+TODO depth inportance
+
+
+
+# Property Specification Language
+
+**P**roperty **S**pecification **L**anguage [@wiki_psl] is a _temporal logic_
+i.e. a language designed for expressing logic over time easily. This is what
+will be used to formulate verifications.
+
+Here follows a short introduction to PSL, further concepts will be introduced
+as needed, other sources are [@vhdl_konst, ch. 13; @psl_doulos, @psl_tutorial].
+
+## Syntax
 
 A PSL statement has the following form:
 
-```{.text}
+```{.vhdl}
 assert always CONDITION;
 ```
 
-Checked at an associated clock edge:
 
-```{.text}
+Usually only asserted at an associated clock edge:
+
+```{.vhdl}
 assert always CONDITION @(rising_edge(clk));
-```
-
-Or a default clock:
-
-```{.text}
+-- Or using a default clock
 default Clock is rising_edge(clk);
 assert always CONDITION;
 ```
 
-And the check can be conditional:
 
-```{.text}
+An assertion can be conditional:
+
+```{.vhdl}
 assert always PRECONDITION -> CONDITION;
 ```
 
 
-`assert` is a directive, can be `assert`, `assume`, `cover` or `restrict` the
-first two should be familiar. `always` is a "temporal operator" i.e when the
-most common ones are `always` and `never`.
++ `assert` is a directive, can be one of the following (the first two should be
+  familiar).
+  - `assert`
+  - `assume`
+  - `cover`
+  -`restrict`
 
-There is also "**SERE**" syntax where `{CONDITION_A;CONDITION_B}` means that
-`CONDITION_A` refers to something in the first cycle and `CONDITION_B`
-something in the following cycle. This also includes the operators `|->` and
-`|=>` where `{a;b} |-> {c}` means that `a` and a consecutive `b` implies `c` in
-the **same cycle** as `b`.
++ `always` is a "temporal operator" i.e. when condition should be checked, the most common ones are
+  - `always`
+  - `never`
 
-`{a} |=> {b}` means that `a` implies `b` in the **next cycle**
+There is also "**SERE**" syntax:
 
-These can be modified further `{a[*5]}` means `a` repeated for 5 cycles
+```{.vhdl}
+{CONDITION_A;CONDITION_B}
+```
 
-If we look at the aspects from the previous chapter:
+`CONDITION_A` refers to something in the current cycle and `CONDITION_B`
+something in the following cycle. These can be modified further e.g.
+`{a[*5];b;c}` means `a` must hold for 5 cycles, then `b` then `c`.
+
+SERE also includes the operators `|->` and `|=>`
+
+```{.vhdl}
+{a;b} |-> {c}
+{x} |=> {y}
+```
+
+This means that `a` and a consecutive `b` implies `c` in the **same cycle** as
+`b` and means that `x` implies `y` in the **next cycle**.
+
+## Examples
+
+As an example the statements from the previous chapter could be expressed using
+PSL in as follows, notice that the examples follows the rule of asserting
+output and assuming inputs:
 
 
 - The output `foo` **shall** never have a value higher `50`.
 
-    ```{.text}
+    ```{.vhdl}
     assert always (foo <= 50);
-    or
+    -- or
     assert never (foo > 50);
     ```
 
@@ -131,59 +235,116 @@ If we look at the aspects from the previous chapter:
 - The output `bar` **shall** only ever be high for one cycle at a time, `next`
   here refers to the next cycle.
 
-    ```{.text}
+    ```{.vhdl}
     assert always bar = '1' -> next bar = '0';
-    or
+    -- or
     assert always bar -> next not bar;
+    -- or
+    assert always {bar} |=> {not bar};
     ```
 
 - The input `baz` **will** only be high at the same time as input `zot`.
 
-    ```{.text}
+    ```{.vhdl}
     assume always baz -> zot;
+    -- or
+    assume always {baz} |-> {zot};
     ```
 
 - The input `blarg` **will** always be high after `fum` has been low for two
   cycles.
 
-    ```{.text}
+    ```{.vhdl}
     assume always {(fum = '0')[*2]} |=> {blarg};
     ```
 
-This is just a short introduction to **PSL**, further concepts will be
-introduced as needed. Some other sources are TODO TODO.
+## PSL and VHDL
 
-## BMC
+PSL is available in "flavors" for use with both VHDL and Verilog, this document
+uses the VHDL flavor. An common alternative  to PSL is "**S**ystem **V**erilog
+**A**ssertions" for System Verilog, which is the primary use case for some of
+the tools mentioned below^[SVA can also be made to work with VHDL but this
+requires extra proprietary tools.].
 
-TODO
+The PSL code can be connected to the VHDL code in one of three ways:
 
+ - **As comments:** This places the PSL code in the same file as the VHDL code
+   but in comments starting with `-- psl`. An advantage is that unsupported
+   tools just ignores these statements. e.g.
 
-## $k$-induction
+      ```{.vhdl}
+      -- psl assert always bar -> next not bar;
+      ```
 
-TODO
+ - **Inline:** The VHDL 2008 Standard supports PSL directly in VHDL code, this
+   can be combined with a generic generate statement to optionally toggle the
+   code.
+
+      ```{.vhdl}
+      formal_g : if g_doFormal generate
+      begin
+         psl assert always bar -> next not bar;
+      end generate;
+      ```
+
+ - **Vunit**: In a separate file as so called vunit, this brings the PSL code
+   into to the same scope as entity that is being tested.
+
 
 
 # Tools
 
-## `Yosys`
-
-TODO
-
 ## `SymbiYosys`
 
-TODO
+From [@symbiyosys]:
 
-## `z3`, `avy`, `boolector` etc.
+>SymbiYosys (sby) is a front-end driver program for Yosys-based formal hardware
+>verification flows. SymbiYosys provides flows for the following formal tasks:
+>
+> - Bounded verification of safety properties (assertions)
+  - Unbounded verification of safety properties
+  - Generation of test benches from cover statements
+  - Verification of liveness properties
 
-TODO
+This is the main program used in the verification process, its main function is
+to orchestrate the other programs to a easy to handle interface. Setup is done
+with `.sby` files that describes and runs the verification flow.
 
-## `GHDL`
 
-TODO
+## Yosys
 
-## `ghdl-yosys-plugin`
+**Yosys** [@yosys] is a open-source synthesis tool/framework with built in
+functions for formal verification. Normally takes Verilog code as input,
+however when built with `ghdl-yosys-plugin` it uses `GHDL` to input VHDL and
+synthesize this to native netlists.
 
-TODO
+
+## GHDL
+
+From [@ghdl]:
+
+> GHDL is an open-source analyzer, compiler, simulator and (experimental)
+synthesizer for VHDL, a Hardware Description Language (HDL). GHDL is not an
+interpreter: it allows you to analyse and elaborate sources to generate machine
+code from your design. Native program execution is the only way for high speed
+simulation.
+
+GHDL is a very versatile tool, with many uses. For the formal verification
+herein it is used mainly as library to compile/synthesize VHDL designs
+including PSL to a netlist that is compatible with the Yoys tool.
+
+## ghdl-yosys-plugin
+
+A plugin [@yosys-ghdl] for Yosys that enables synthesis of VHDL input using
+GHDL.
+
+
+## z3, avy, boolector, smtbmc etc.
+
+Different SMT engines [@wiki_smt], they are called by SymbiYosys to do the
+heavy lifting of checking the whether the assertion and assumptions holds. They
+have different advantages and disadvantages, so which one to use for a certain
+design might differ.
 
 
 ### Prerequisites
@@ -191,18 +352,14 @@ TODO
 #### Operating system
 
 The tools used throughout this example are command line based Linux
-applications but is possible to run them on multiple systems:
+applications but is possible to run them on other systems:
 
 - **Linux:** Any recent Linux distribution should be usable.
-- **Windows 10:** Using 'Windows Subsystem for Linux'
+- **Windows 10:** Using 'Windows Subsystem for Linux', its recommended to use a
+  up to date Windows10 and WSL2, [see here for instructions](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 - **macOS:** Using the nix method described below this should be possible as well, but is
   not verified.
 
-https://docs.microsoft.com/en-us/windows/wsl/install-win10
-Any recent Linux distribution should be usable.
-
-
-open-source tools used are intended to run on Linux,
 
 #### Optional
 

@@ -2,6 +2,49 @@
 references:
 # Exjob {{{
 
+  - id: wiki_smt
+    title: 'Wikipedia SMT'
+    type: Webpage
+    issued:
+      year: 2021
+      month: 01
+      day: 12
+    URL: "https://en.wikipedia.org/wiki/Satisfiability_modulo_theories"
+
+  - id: psl_tutorial
+    title: 'PSL tutorial'
+    type: Webpage
+    issued:
+      year: 2021
+      month: 01
+      day: 12
+    URL: "http://www.project-veripage.com/psl_tutorial_1.php"
+
+  - id: psl_doulos
+    title: 'The Designers guide to PSL'
+    type: Webpage
+    issued:
+      year: 2021
+      month: 01
+      day: 12
+    URL: "https://www.doulos.com/knowhow/psl/"
+
+  - id: vhdl_konst
+    title: 'VHDL för konstruktion'
+    author: 'Stefan Sjöholm & Lennart Lindh'
+    publisher: 'Studentlitteratur'
+    issued:
+      year: 2018
+
+  - id: wiki_ind
+    title: 'Wikipedia Mathematical Induction'
+    type: Webpage
+    issued:
+      year: 2021
+      month: 01
+      day: 12
+    URL: "https://en.wikipedia.org/wiki/Mathematical_induction"
+
   - id: nix_web
     title: 'Nix Website'
     type: Webpage
@@ -19,6 +62,15 @@ references:
       month: 01
       day: 07
     URL: "https://en.wikipedia.org/wiki/Property_Specification_Language"
+
+  - id: yosys-ghdl
+    title: 'ghdl-yosys-plugin'
+    type: Webpage
+    issued:
+      year: 2021
+      month: 01
+      day: 07
+    URL: "https://github.com/ghdl/ghdl-yosys-plugin"
 
   - id: symbiyosys
     title: 'SymbiYosys Documentation'
