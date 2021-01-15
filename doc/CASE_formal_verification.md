@@ -1,8 +1,11 @@
 ---
-title: "CASE: Formal Verification of an HLS component"
+title: "Formal Verification of HLS designs"
 date: TODO
-subtitle: "Using open-source tools, VHDL and PSL"
+subtitle: "Using VHDL, PSL and open-source tools."
 titlepage: true
+header-includes: |
+    \usepackage{sectsty}
+    \sectionfont{\clearpage}
 abstract: |
   TODO
 ---
@@ -24,12 +27,12 @@ TODO More
 
 A HDL design after synthesis can be viewed in its whole as a Finite State
 Machine, completely represented by its current state and all its
-inputs^[including any clock] as transitions. This can then represent all
-possible states of a design, probably only some of these states are **valid
-states** where the design works as expected, this is implicit, this state space
-will also contain the designs initial state.
+inputs^[including any clock] as transitions. This then represent all possible
+states of a design, probably only some of these states are **valid states**
+where the design works as expected, this is implicit, this state space will
+also contain the designs initial state.
 
-By **asserting** certain aspects of a design. I.e:
+By **asserting** certain aspects of a design e.g.:
 
 - The output `foo` **shall** never have a value higher `50`.
 - The output `bar` **shall** only ever be high for one cycle at a time.
@@ -54,7 +57,7 @@ possible states, as shown in @fig:st_2.
 The goal is by **asserting** to make sure any transition from a valid is either
 to a implicit valid state or a explicit invalid state, **not** to a possible,
 undefined state. And by **assuming** shrinking the possible state space until
-only valid and invalid states remains, see @fig:st_3
+only valid and invalid states remain, see @fig:st_3
 
 ![Goal](states_3.png){#fig:st_3 width=4cm}
 
@@ -71,7 +74,7 @@ Although the first part may be valuable in itself.
 solver starts out in the initial state of the design and steps the logic
 forward from there a certain number of steps $k_{bmc}$ (also referred to as the
 depth of the proof). I.e it checks a branching tree of states to see that we
-don't enter a invalid state, see @fig:bmc_1. This proves that **no invalid
+don't enter an invalid state, see @fig:bmc_1. This proves that **no invalid
 state is reachable within $k_{bmc}$ steps.** However it says nothing about the
 what might happen after that ($k_{bmc}+1$ or $k_{bmc}+n$), in practice this
 step turns out to often be able to find many bugs in itself. Increasing $k$
@@ -157,18 +160,18 @@ i.e. a language designed for expressing logic over time easily. This is what
 will be used to formulate verifications.
 
 Here follows a short introduction to PSL, further concepts will be introduced
-as needed, other sources are [@vhdl_konst, ch. 13; @psl_doulos, @psl_tutorial].
+as needed, other sources are [@vhdl_konst, ch. 13; @psl_doulos; @psl_tutorial].
 
 ## Syntax
 
-A PSL statement has the following form:
+**A PSL statement has the following form:**
 
 ```{.vhdl}
 assert always CONDITION;
 ```
 
 
-Usually only asserted at an associated clock edge:
+**Usually only asserted at an associated clock edge:**
 
 ```{.vhdl}
 assert always CONDITION @(rising_edge(clk));
@@ -178,25 +181,26 @@ assert always CONDITION;
 ```
 
 
-An assertion can be conditional:
+**An assertion can be conditional:**
 
 ```{.vhdl}
 assert always PRECONDITION -> CONDITION;
 ```
 
+"`assert`" is a directive, it can be one of the following, the first two should be familiar:
+:   `assert`
+:   `assume`
+:   `cover`
+:   `restrict`
 
-+ `assert` is a directive, can be one of the following (the first two should be
-  familiar).
-  - `assert`
-  - `assume`
-  - `cover`
-  -`restrict`
+"`always`" is a temporal operator, i.e. when should the condition hold, the most common ones are:
+:   `always`
+:   `never`
 
-+ `always` is a "temporal operator" i.e. when condition should be checked, the most common ones are
-  - `always`
-  - `never`
 
-There is also "**SERE**" syntax:
+---
+
+**There is also "SERE" syntax:**
 
 ```{.vhdl}
 {CONDITION_A;CONDITION_B}
@@ -204,7 +208,8 @@ There is also "**SERE**" syntax:
 
 `CONDITION_A` refers to something in the current cycle and `CONDITION_B`
 something in the following cycle. These can be modified further e.g.
-`{a[*5];b;c}` means `a` must hold for 5 cycles, then `b` then `c`.
+`{a[*5];b;c}` means `a` must hold for 5 cycles, then `b` for one cycle and then
+`c` for one cycle.
 
 SERE also includes the operators `|->` and `|=>`
 
@@ -231,6 +236,7 @@ output and assuming inputs:
     assert never (foo > 50);
     ```
 
+\
 
 - The output `bar` **shall** only ever be high for one cycle at a time, `next`
   here refers to the next cycle.
@@ -243,6 +249,8 @@ output and assuming inputs:
     assert always {bar} |=> {not bar};
     ```
 
+\
+
 - The input `baz` **will** only be high at the same time as input `zot`.
 
     ```{.vhdl}
@@ -251,12 +259,16 @@ output and assuming inputs:
     assume always {baz} |-> {zot};
     ```
 
+\
+
 - The input `blarg` **will** always be high after `fum` has been low for two
   cycles.
 
     ```{.vhdl}
     assume always {(fum = '0')[*2]} |=> {blarg};
     ```
+
+\
 
 ## PSL and VHDL
 
@@ -294,7 +306,7 @@ The PSL code can be connected to the VHDL code in one of three ways:
 
 # Tools
 
-## `SymbiYosys`
+## SymbiYosys
 
 From [@symbiyosys]:
 
@@ -313,7 +325,7 @@ with `.sby` files that describes and runs the verification flow.
 
 ## Yosys
 
-**Yosys** [@yosys] is a open-source synthesis tool/framework with built in
+**Yosys** [@yosys] is an open-source synthesis tool/framework with built in
 functions for formal verification. Normally takes Verilog code as input,
 however when built with `ghdl-yosys-plugin` it uses `GHDL` to input VHDL and
 synthesize this to native netlists.
@@ -347,38 +359,47 @@ have different advantages and disadvantages, so which one to use for a certain
 design might differ.
 
 
-### Prerequisites
+## Prerequisites
+
+The tools used throughout this example are command line based Linux
+applications, so some familiarity with a command line environment^[The examples
+uses `bash`] is assumed.
+
 
 #### Operating system
 
-The tools used throughout this example are command line based Linux
-applications but is possible to run them on other systems:
+The tool are Linux based but the workflow is possible to run on other systems:
 
 - **Linux:** Any recent Linux distribution should be usable.
 - **Windows 10:** Using 'Windows Subsystem for Linux', its recommended to use a
-  up to date Windows10 and WSL2, [see here for instructions](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+  up to date Windows10 and WSL2:
+  [`docs.microsoft.com/en-us/windows/wsl/install-win10`](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 - **macOS:** Using the nix method described below this should be possible as well, but is
-  not verified.
+  not verified. TODO
 
 
 #### Optional
 
 - `Git` if the project is to be fetched from GitHub, alternatively use the
-  attached files.
-- `GtkWave` a Linux waveform viewer for visualising the output from the tools,
-  ModelSim can be used as a alternative, (TODO investigate this)
+  attached files, this is included by default in most Linux distros and WSL.
+- `GtkWave` a Linux waveform viewer for visualising the output from the tools
+  [`gtkwave.sourceforge.net`](http://gtkwave.sourceforge.net/),
+  ModelSim includes the `vcd2wlf` utility, this can be used to view resultant
+  waveforms in ModelSim instead.
 
 
 ## Installation
 
+TODO mention docker setup
 
 ### Nix setup
 
-In order to facilitate easy installation of required software a custom setup
-using the **Nix**^[Nix is among other things a package manager that allows
-setting up a per project shell environment that is independent of the operating
-system] package manager[@nix_web] has been prepared. This consist of the `.nix`
-files in TODO directory. This is also made available as GitHub repository TODO.
+In order to facilitate easy installation of the required software a custom
+setup using the **Nix**^[Nix is among other things a package manager that
+allows setting up a per project shell environment that is independent of the
+operating system] package manager[@nix_web] has been constructed along with
+examples in this guide. This consist of the `.nix` files in TODO directory.
+This is also made available as GitHub repository TODO.
 
 These files declaratively describes a shell environment using working versions
 of all required software, **Nix** is a completely separate subject, but this
@@ -386,61 +407,279 @@ should make the installation which is fairly advanced possible for users with
 limited knowledge.
 
 
-At the time of writing nix can be installed as follows (but check the website
-for any updates), then follow the instructions:
+1. At the time of writing nix can be installed as follows (but check the
+   website for any updates), then follow the instructions:
 
-``` .bash
-$ curl -L https://nixos.org/nix/install | sh
-```
+      ``` .bash
+      $ curl -L https://nixos.org/nix/install | sh
+      ```
 
+2. Download the examples and nix setup, or skip this and copy the attached
+   files:
 
-The TODO directory can then be entered
+      ``` .bash
+      $ git clone TODO
+      ```
 
-``` .bash
-$ cd <location of attched files>/TODO
-```
+3. Enter the project directory can then be entered
 
-**or** cloned from GitHub:
+      ``` .bash
+      $ cd TODO/TODO
+      ```
 
-``` .bash
-$ git clone TODO
-$ cd TODO/TODO
-```
-
-
-The environment can then be invoked^[This might take a while the first time,
+4. Start the Nix environment with the following command ^[This might take a while the first time,
 some parts are fetched and some are built from source]:
 
-``` .bash
-$ nix-shell
+      ``` .bash
+      $ nix-shell
+      ```
+
+5. Now the tools should be executable:
+
+      ``` .bash
+      $ ghdl --version
+      GHDL 1.0-dev () [Dunoon edition]
+       Compiled with GNAT Version: 9.3.0
+       llvm code generator
+      Written by Tristan Gingold.
+      ...
+
+      $ yosys --version
+      Yosys 0.9+3830 (git sha1 b72c294653, g++ 10.2.0 -fPIC -Os)
+      ...
+
+      $ sby --help
+      usage: sby [options] [<jobname>.sby [tasknames] | <dirname>]
+      ...
+      ```
+
+
+
+# Example 1: Counter
+
+The first example is the formal verification of simple counter, the complete
+code can be seen in the appendix, the entity and main process is:
+
+```{.vhdl include=../code/rtl/counter.vhd startLine=5 endLine=18}
 ```
 
-Now the tools should be executable:
-
-``` .bash
-$ ghdl --version
-GHDL 1.0-dev () [Dunoon edition]
- Compiled with GNAT Version: 9.3.0
- llvm code generator
-Written by Tristan Gingold.
-...
-
-$ yosys --version
-Yosys 0.9+3830 (git sha1 b72c294653, g++ 10.2.0 -fPIC -Os)
-...
-
-$ sby --help
-usage: sby [options] [<jobname>.sby [tasknames] | <dirname>]
-...
+```{.vhdl include=../code/rtl/counter.vhd startLine=27 endLine=44}
 ```
 
+The PSL statement are wrapped as a VHDL `generate` section controlled by a
+generic option, this makes disabling the checks easy when using synthesizing
+for hardware etc.
+
+## `.sby` file
+
+To be able to do a formal verification SymbiYosys needs a `.sby` file script
+this is located in TODO folder and looks as follows, the file is described in
+the comments, the complete syntax is described at the SymbiYosys website
+@symbiyosys:
+
+```{.ini include=../code/formal/counter.sby}
+```
+
+Now the tools can be tested, as nothing about the design has been asserted, it
+should pass both the BMC and induction step, this is run from the `formal`
+folder:
+
+```{.bash}
+$ cd formal
+$ sby -f counter.sby
+...
+[counter] engine_0: Status returned by engine for basecase: pass
+[counter] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+[counter] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+[counter] summary: engine_0 (smtbmc z3) returned pass for induction
+[counter] summary: engine_0 (smtbmc z3) returned pass for basecase
+[counter] summary: successful proof by k-induction.
+[counter] DONE (PASS, rc=0)
+```
+
+And it passes, all files generated by the verification tools are located in the
+`counter` directory, note the `-f` when running `sby` is needed to overwrite
+this directory directory on subsequent runs. If the verification fails a wave
+file is generated located in this directory^[A Verilog testbench with a
+counterexample is also generated in case of failure].
+
+
+## Assertions and assumptions
+
+### Saturation
+
+Now we can start to add assertions, firstly we add a default clock then we
+assert that the counter should not change when saturated, The `stable()`
+function checks that a signal has not changed since the previous cycle:
+
+```{.vhdl}
+ default clock is rising_edge(clk);
+
+ high_stable : assert always up and unsigned(count_out) = to_unsigned(high_val, 32) ->
+   next stable(count_out);
+ low_stable : assert always not up and unsigned(count_out) = to_unsigned(low_val, 32) ->
+   next stable(count_out);
+```
+
+If we now rerun `SymbiYosys`:
+
+```{.bash}
+$ sby -f counter.sby
+...
+[counter] summary: engine_0 (smtbmc z3) returned FAIL for basecase
+[counter] summary: counterexample trace: counter/engine_0/trace.vcd
+[counter] DONE (FAIL, rc=2)
+```
+
+Failure? Let's open the counterexample^[If using GtkWave: "`gtkwave
+counter/engine_0/trace.vcd &`"] and look at the trace (@fig:c1):
+
+![Counter Fail](count_fail_1.png){#fig:c1 width=4cm}
+
+The verification failed because the assertions don't hold when the reset goes
+low, this is expected behavior, to handle case this the `abort` qualifier can
+be added to the statements making the tool disregard this assertion if a
+`reset_n` goes low: 
+
+```{.vhdl}
+ high_stable : assert always up and unsigned(count_out) = to_unsigned(high_val, 32) ->
+   next stable(count_out) abort not reset_n;
+ low_stable : assert always not up and unsigned(count_out) = to_unsigned(low_val, 32) ->
+   next stable(count_out) abort not reset_n;
+```
+
+This fixes the problem:
+
+```{.bash}
+$ sby -f counter.sby
+...
+[counter] DONE (PASS, rc=0)
+```
+
+### Enable signal
+
+Next we add an assertion regarding the `enable` signal, whenever `enable` is
+low the output shall remain unchanged. `until_` is a operator that means that
+the condition shall hold until the right hand condition is met. The underscore
+suffix means that the cycle when enable goes high should be included, there is
+a corresponding `until`. This is common pattern in PSL functions. 
+
+```{.vhdl}
+  disable_stable : assert always
+    not enable -> next (stable(count_out) until_ enable) abort not reset_n;
+```
+
+### Increment/Decrement
+
+The next section asserts that the output counts up and down as it should. The
+`prev()` function references the signal value of the previous cycle, since the
+right hand side of the implies operator (`->`) starts with `next` the `prev()`
+refers to the cycle when the left side condition was true ie. the previous
+cycle.
+
+```{.vhdl}
+count_up : assert always
+  reset_n and up and enable and unsigned(count_out) < to_unsigned(high_val, 32) ->
+    next unsigned(count_out) = unsigned(prev(count_out)) + 1
+      abort not reset_n;
+
+count_down : assert always
+  (reset_n and (up = '0')) and enable and unsigned(count_out) > to_unsigned(low_val, 32) ->
+    next unsigned(count_out) = unsigned(prev(count_out)) - 1
+      abort not reset_n;
+```
+
+### Reset
+
+What should happen when the reset goes low? The output should be reset to the
+initial `low_val` generic. And since the output is registered it should stay
+the same for one more cycle, notice the use of the SERE operators `|->` and
+`[*2]` to describe exactly this: 
+
+```{.vhdl}
+reset_output : assert always
+ reset_n = '0' |-> {(unsigned(count_out) = to_unsigned(low_val,32))[*2]};
+```
+
+Verification still passes with these new assertions:
+
+```{.bash}
+$ sby -f counter.sby
+...
+[counter] DONE (PASS, rc=0)
+```
+
+### Minimum and maximum
+
+Let's assert the minimum and maximum value of the output:
+
+```{.vhdl}
+valid_range : assert always
+   unsigned(count_out) >= to_unsigned(low_val,32) and
+   unsigned(count_out) <= to_unsigned(high_val,32);
+```
+
+However this fails, lets investigate:
+
+```{.bash}
+$ sby -f counter.sby
+...
+[counter] DONE (FAIL, rc=2)
+```
+
+If we look at the trace @fig:c2 we see that the counter **starts** with a value
+of 18 (`>high_val`). This shows an important point, the tools checks all
+possible values, including **all possible initial states** and nothing has been
+said about the initial state. So the solver starts in invalid (but not
+asserted/assumed state).
+
+![Counter Fail](count_fail_2.png){#fig:c2 width=4cm}
+
+One way to solve this is to assign the counter a default value:
+
+```{.vhdl}
+signal count : natural range low_val to high_val := low_val;
+```
+
+However this might not correspond to what will happen in hardware. Instead we
+might make an **assumption** that the design with always start with a reset:
+
+```{.vhdl}
+initial_reset : assume {{not Reset_n[+]; Reset_n[+]}[+]};
+```
+
+The SERE operator "`[+]`" means that the preceding statement should hold for
+one or more cycles. So the assumption is that `reset_n` will be low for one or
+more cycles, then high for one or more cycles, this whole sequence might be
+repeated one or more times.
+
+```{.bash}
+$ sby -f counter.sby
+...
+[counter] DONE (PASS, rc=0)
+```
+
+## Artificial error
+
+If we introduce a not so subtle error in the main process the verification
+fails and we can see this represented in the waveform (@fig:c3):
+
+```{.vhdl}
+ -- count <= count + 1;
+ if count /= 10 then count <= count +1; else count <= 7; end if;
+```
+
+![Counter Fail](count_fail_3.png){#fig:c3 width=8cm}
+
+
+## Summary
 
 TODO
 
+# Example 2: TODO
 
-# Formal verification of TEIS VGA IP
 
-TODO
+# Example 3: TODO
 
 
 # Remarks
@@ -450,8 +689,13 @@ TODO
 
 # References
 
-<div id="refs"></div>
+::: {#refs}
+:::
 
-# Attachments {-}
+# Appendix {-}
 
-## Appendix A
+## A. Counter {-}
+
+```{.vhdl include=../code/rtl/counter.vhd}
+```
+

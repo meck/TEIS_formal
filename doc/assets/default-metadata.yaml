@@ -11,9 +11,9 @@ toc-own-page: true
 numbersections: true
 footnotes-pretty: true
 papersize: a4
-mainfont: "Source Serif Pro"
-sansfont: "Source Sans Pro"
-monofont: "Iosevka"
+# mainfont: "Source Serif Pro"
+# sansfont: "Source Sans Pro"
+monofont: "Iosevka Fixed"
 bibliography: refs.yaml
 csl: "assets/ieee.csl"
 link-citations: true

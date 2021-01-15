@@ -1,0 +1,39 @@
+# `.sby` files consists of sections
+# in [brackets] describing the operations
+# to be performed. Some options have default
+# values.
+
+[options]
+# The mode is the options describe what to
+# do `prove` is a bmc check followed by a
+# unbounded (induction) check. Can also be `bmc`
+# to only run a bounded check and other values
+# for different checks
+mode prove
+
+# The depth of bmc, default value is 20
+depth 25
+
+# Which engine and solver to use.
+# The different combinations have
+# different advantages and disadvantages.
+[engines]
+smtbmc z3
+
+# The [script] section contains the Yosys commands
+# to synthesize the design to get it ready for
+# SymbiYosys using GHDL. Here only .vhd file
+# is loaded and its entity is defined. The
+# next command tells Yosys what the top level
+# entity is.
+# Note that since the PSL statements are inline
+# ghdl should use the VHDL2008 standard.
+[script]
+ghdl --std=08 counter.vhd -e counter
+prep -top counter
+
+
+# Under [files] all files needed to to synthesize
+# the design are listed.
+[files]
+../rtl/counter.vhd
