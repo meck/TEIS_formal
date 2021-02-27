@@ -1,5 +1,5 @@
 ---
-title: "Formal Verification of HLS designs"
+title: "Formal Verification of HDL designs"
 date: TODO
 subtitle: "Using VHDL, PSL and open-source tools."
 titlepage: true
@@ -15,16 +15,33 @@ abstract: |
 The promise of formal verification is to be able to mathematically prove
 aspects about a design. These methods can be applied to a design either in a
 construction phase in order to find bugs or as a verification of a completed
-design. It should be noted that the author is a beginner and this an
-exploration and **not authoritative knowledge** in any way. The methods
-described is also only one of many possible techniques for formal verification.
+design. Formal verification can be used both as a complement to verification
+using test benches or in some cases as a replacement.
 
 
-When writing a test bench the designer writes codes that defines the input and
-checks if the output is correct, when constructing a formal proof the designer
-writes code that defines the output, and the tools checks if output is correct.
+In a hand-wavy way the process can be compared to traditional test benches in
+the following way; When writing a test bench the designer writes codes that
+defines the input and checks if the output is correct, when constructing a
+formal proof the designer writes code that defines the output, and the tools
+checks if output is correct.
 
-TODO More
+
+Formal verification has until recently required proprietary and expensive
+software. Recent advances in some open-source software has lowered the entry
+barrier greatly, some of these tools are connected to other FPGA open-source
+project^[synthesis, place and route and bitstream generation]. Many of these
+projects primary use Verilog as the HDL of choice, however this project looks
+at using the tools with VHDL.
+
+The HDL language chosen needs to be augmented with another language to
+accurately be able to describe the temporal aspects of the design for the
+verification tools. For this chosen the PSL language as seems to be the option
+most closely related to VHDL.
+
+
+It should be noted that the author is a beginner and this an exploration and
+**not authoritative knowledge** in any way. The methods described is also only
+one of many possible techniques for formal verification.
 
 
 # Theory
@@ -34,20 +51,20 @@ Machine, completely represented by its current state and all its
 inputs^[including any clock] as transitions. This then represent all possible
 states of a design, probably only some of these states are **valid states**
 where the design works as expected, this is implicit, this state space will
-also contain the designs initial state.
+also contain the designs **initial** state.
 
 By **asserting** certain aspects of a design e.g.:
 
-- The output `foo` **shall** never have a value higher `50`.
+- The output `foo` **shall** never have a value higher then $50$.
 - The output `bar` **shall** only ever be high for one cycle at a time.
 
 Some of the possible states, where any of these things happens, can then be
-viewed as **invalid states**, this is shown in @fig:st_1.
+marked as **invalid states**, this is shown in @fig:st_1.
 
 ![States](states_1.png){#fig:st_1 width=6cm}
 
 Further it can be **assumed** aspects about the design, I.e thing that will
-never happen:
+never or always happen:
 
 - The input `baz` **will** only be high at the same time as input `zot`.
 - The input `blarg` **will** always be high after `fum` has been low for two
@@ -58,10 +75,11 @@ possible states, as shown in @fig:st_2.
 
 ![Assumed states](states_2.png){#fig:st_2 width=6cm}
 
-The goal is by **asserting** to make sure any transition from a valid is either
-to a implicit valid state or a explicit invalid state, **not** to a possible,
-undefined state. And by **assuming** shrinking the possible state space until
-only valid and invalid states remain, see @fig:st_3
+The goal of writing a formal proof is by **asserting** to make sure any
+transition from a valid is either to a implicit valid state or a explicit
+invalid state, **not** to a possible, undefined state. And by **assuming**
+shrinking the possible state space until only valid and invalid states remain,
+see @fig:st_3
 
 ![Goal](states_3.png){#fig:st_3 width=4cm}
 
@@ -193,7 +211,7 @@ assert always PRECONDITION -> CONDITION;
 "`assert`" is a directive, the following are available
 :   `assert` Assert the following holds
 :   `assume` Assume the following holds
-:   `restrict` Like Assume, but behaves differently when simulating in some tools 
+:   `restrict` Like Assume, but behaves differently when simulating in some tools
 :   `cover` Specifically check that following state is reachable
 
 
@@ -452,6 +470,10 @@ some parts are fetched and some are built from source]:
       ...
       ```
 
+A alternative way of simplifying setting up a environment is by use of docker
+containers ,this is not covered here, but for anyone interested containers are
+available at
+[`https://hdl.github.io/containers/`](https://hdl.github.io/containers/).
 
 
 # Example 1: Counter
@@ -459,10 +481,10 @@ some parts are fetched and some are built from source]:
 The first example is the formal verification of simple counter, the complete
 code can be seen in the appendix, the entity and main process is:
 
-```{.vhdl include=../code/rtl/counter.vhd startLine=5 endLine=18}
+```{.vhdl include=../code/hdl/counter.vhd startLine=5 endLine=18}
 ```
 
-```{.vhdl include=../code/rtl/counter.vhd startLine=27 endLine=44}
+```{.vhdl include=../code/hdl/counter.vhd startLine=27 endLine=44}
 ```
 
 The PSL statement are wrapped as a VHDL `generate` section controlled by a
@@ -695,6 +717,6 @@ TODO
 
 ## A. Counter {-}
 
-```{.vhdl include=../code/rtl/counter.vhd}
+```{.vhdl include=../code/hdl/counter.vhd}
 ```
 

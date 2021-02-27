@@ -1,26 +1,19 @@
-{ }:
+{}:
 let
-
-  pkgs = import (builtins.fetchTarball {
-    name = "nixpkgs-unstable-2021-01-06";
-    url =
-      "https://github.com/nixos/nixpkgs/archive/4445bb7284f43feb2f3253d8fb1964f901df5ba1.tar.gz";
-    sha256 = "1rz782whlll5ckc85qzndk5klygbjvxwnsgpm8lqqwb85y02s9cs";
-  }) { };
+  pkgs = import
+    (builtins.fetchTarball {
+      name = "nixpkgs-unstable-2021-02-27";
+      url =
+        "https://github.com/nixos/nixpkgs/archive/f6b5bfdb470d60a876992749d0d708ed7b6b56ca.tar.gz";
+      sha256 = "1rfsyz5axf2f7sc14wdm8dmb164xanbw7rcw6w127s0n6la17kq2";
+    }) { };
 
   fonts = pkgs.makeFontsConf {
     fontDirectories = with pkgs; [ source-sans-pro source-serif-pro iosevka ];
   };
 
-  pandoc-include-code = pkgs.haskellPackages.callCabal2nix "pandoc-include-code"
-    (pkgs.fetchFromGitHub {
-      owner = "owickstrom";
-      repo = "pandoc-include-code";
-      rev = "89c8465549960872257da993a399d978a269d6a6";
-      sha256 = "07xj82injmcvqn0wz33qaqmvagfpbchk9s9gd6wcqdpmxg0ln5wb";
-    }) { };
-
-in pkgs.mkShell {
+in
+pkgs.mkShell {
 
   # Fix for pandoc-plot when running in pure shell
   # LOCALE_ARCHIVE = "${pkgs.glibcLocales}/lib/locale/locale-archive";
@@ -31,7 +24,7 @@ in pkgs.mkShell {
   buildInputs = with pkgs; [
     gnumake
     pandoc
-    pandoc-include-code
+    haskellPackages.pandoc-include-code
     haskellPackages.pandoc-plot
     haskellPackages.pandoc-crossref
     graphviz
