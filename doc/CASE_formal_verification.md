@@ -20,6 +20,10 @@ exploration and **not authoritative knowledge** in any way. The methods
 described is also only one of many possible techniques for formal verification.
 
 
+When writing a test bench the designer writes codes that defines the input and
+checks if the output is correct, when constructing a formal proof the designer
+writes code that defines the output, and the tools checks if output is correct.
+
 TODO More
 
 
@@ -180,22 +184,23 @@ default Clock is rising_edge(clk);
 assert always CONDITION;
 ```
 
-
 **An assertion can be conditional:**
 
 ```{.vhdl}
 assert always PRECONDITION -> CONDITION;
 ```
 
-"`assert`" is a directive, it can be one of the following, the first two should be familiar:
-:   `assert`
-:   `assume`
-:   `cover`
-:   `restrict`
+"`assert`" is a directive, the following are available
+:   `assert` Assert the following holds
+:   `assume` Assume the following holds
+:   `restrict` Like Assume, but behaves differently when simulating in some tools 
+:   `cover` Specifically check that following state is reachable
+
+
 
 "`always`" is a temporal operator, i.e. when should the condition hold, the most common ones are:
-:   `always`
-:   `never`
+:   `always` must always hold
+:   `never` shall never hold
 
 
 ---
@@ -228,18 +233,16 @@ PSL in as follows, notice that the examples follows the rule of asserting
 output and assuming inputs:
 
 
-- The output `foo` **shall** never have a value higher `50`.
+- **The output `foo` *shall* never have a value higher `50`**.
 
-    ```{.vhdl}
+    ``` {.vhdl}
     assert always (foo <= 50);
     -- or
     assert never (foo > 50);
     ```
 
-\
-
-- The output `bar` **shall** only ever be high for one cycle at a time, `next`
-  here refers to the next cycle.
+- **The output `bar` *shall* only ever be high for one cycle at a time, `next`
+here refers to the next cycle.**
 
     ```{.vhdl}
     assert always bar = '1' -> next bar = '0';
@@ -249,9 +252,7 @@ output and assuming inputs:
     assert always {bar} |=> {not bar};
     ```
 
-\
-
-- The input `baz` **will** only be high at the same time as input `zot`.
+- **The input `baz` *will* only be high at the same time as input `zot`.**
 
     ```{.vhdl}
     assume always baz -> zot;
@@ -259,16 +260,14 @@ output and assuming inputs:
     assume always {baz} |-> {zot};
     ```
 
-\
 
-- The input `blarg` **will** always be high after `fum` has been low for two
-  cycles.
+- **The input `blarg` *will* always be high after `fum` has been low for two
+cycles.**
 
     ```{.vhdl}
     assume always {(fum = '0')[*2]} |=> {blarg};
     ```
 
-\
 
 ## PSL and VHDL
 
@@ -539,7 +538,7 @@ counter/engine_0/trace.vcd &`"] and look at the trace (@fig:c1):
 The verification failed because the assertions don't hold when the reset goes
 low, this is expected behavior, to handle case this the `abort` qualifier can
 be added to the statements making the tool disregard this assertion if a
-`reset_n` goes low: 
+`reset_n` goes low:
 
 ```{.vhdl}
  high_stable : assert always up and unsigned(count_out) = to_unsigned(high_val, 32) ->
@@ -562,7 +561,7 @@ Next we add an assertion regarding the `enable` signal, whenever `enable` is
 low the output shall remain unchanged. `until_` is a operator that means that
 the condition shall hold until the right hand condition is met. The underscore
 suffix means that the cycle when enable goes high should be included, there is
-a corresponding `until`. This is common pattern in PSL functions. 
+a corresponding `until`. This is common pattern in PSL functions.
 
 ```{.vhdl}
   disable_stable : assert always
@@ -594,7 +593,7 @@ count_down : assert always
 What should happen when the reset goes low? The output should be reset to the
 initial `low_val` generic. And since the output is registered it should stay
 the same for one more cycle, notice the use of the SERE operators `|->` and
-`[*2]` to describe exactly this: 
+`[*2]` to describe exactly this:
 
 ```{.vhdl}
 reset_output : assert always

@@ -1,0 +1,109 @@
+vunit VGA_Controller_formal (VGA_Controller(rtl))
+{
+
+  default clock is rising_edge(vga_clock);
+
+-- Initial reset, >1 cycle low, >1 cycle high
+-- repeating
+  -- initial_reset : assume {{not Reset_n[+]; Reset_n[+]}[+]};
+
+
+---------------
+--  Counter  --
+---------------
+
+  counter_reset : assert always not reset_n |-> {{x_counter = 0 and y_counter = 0}[*2]};
+
+  counter_range : assert always (x_counter < 800) and (y_counter < 525);
+
+  x_rollover : assert always x_counter = 799 -> next x_counter = 0;
+  y_rollover : assert always (x_counter = 799) and (y_counter = 524) -> next y_counter = 0;
+
+  x_increment : assert always reset_n and x_counter /= 799 -> next x_counter = prev(x_counter) + 1
+         abort not reset_n;
+
+  y_increment : assert always reset_n and x_counter = 799 and y_counter /= 524 -> next x_counter = 0
+         and y_counter = prev(y_counter) + 1 abort not reset_n;
+
+  signal off_screen : boolean;
+  off_screen <= (x_counter < read_delay ) or (x_counter >= h_display + read_delay) or (y_counter >= v_display);
+  -- off_screen <= (x_counter > h_display - 1) or (y_counter > v_display - 1);
+
+  blanking : assert always off_screen
+               -> (vga_r = "0000") and
+                  (vga_g = "0000") and
+                  (vga_b = "0000");
+
+
+  signal f_addr : std_logic_vector(ADDR_WIDTH - 1 downto 0);
+  signal f_data : std_logic_vector(DATA_WIDTH - 1 downto 0);
+
+  attribute anyconst : boolean;
+  attribute anyconst of f_addr : signal is true;
+
+  signal f_past_val : boolean := false;
+
+  -- signal f_half_clk : std_logic;
+  -- assume always vga_clock = f_half_clk;
+
+  process is
+  begin
+    wait until rising_edge (cpu_clock);
+      if (cpu_we_n = '0') and (cpu_address = f_addr) then
+        f_data <= cpu_data_in;
+        f_past_val <= true;
+      end if;
+      -- f_half_clk <= not f_half_clk;
+  end process;
+
+  assume always f_past_val -> f_data = cpu_data_in;
+
+  foo_ass : assert (always (not off_screen) and f_past_val and (reset_n = '1') and (vga_address = f_addr) -> next
+      (vga_r = prev(f_data(2)) & 
+               prev(f_data(2)) &
+               prev(f_data(2)) &
+               prev(f_data(2))) abort (not reset_n))@rising_edge(vga_clock);
+
+  -- assert always fell(vga_hs) |-> {not vga_hs}[*
+
+  -- ram_cpu_write : assert always f_past_val -> ram(to_integer(unsigned(f_addr))) = f_data;
+  -- ram_cpu_read : assert always f_past_val and cpu_address = f_addr -> next cpu_data_out = prev(f_data);
+
+  -- ram_vga_read : assert (always f_past_val and vga_address = f_addr -> next vga_data_out = prev(f_data))@rising_edge(vga_clock);
+
+  -- assume always (cpu_we_n = '0') and (cpu_address = f_addr) -> f_data = cpu_data_in and f_past_val;
+
+  -- assert always f_past_val and vga_address = f_addr -> next vga_data = prev(f_data);
+
+  -- ram_cpu_read : assert always f_past_val and cpu_address = f_addr -> next cpu_data_out = prev(f_data)
+  -- @(rising_edge(cpu_clock));
+
+
+
+  -- assume always (to_integer(unsigned(cpu_address)) < (320 * 240));
+
+  -- foo_ass : assert always (not off_screen) and f_past_val and (reset_n = '1') and (vga_address = f_addr) -> next
+  --     (vga_r = prev(f_data(2)) & 
+  --              prev(f_data(2)) &
+  --              prev(f_data(2)) &
+  --              prev(f_data(2))) abort not reset_n;
+
+
+
+-- assert always fell(vga_hs) |-> {(not vga_hs)[*96]; vga_hs} abort not reset_n;
+-- assert always {not reset_n; reset_n} |=> {vga_hs[*30]} abort not reset_n;
+
+-- assert always fell(vga_hs) |-> (x_counter = 657);
+
+-- signal blank : boolean;
+-- blank <= (x_counter > h_display) or (y_counter > v_display);
+
+-- assert always (not reset_n) -> (x_counter = 0 and y_counter = 0);
+
+-- assert always fell(vga_hs) |-> (x_counter = 657);
+-- assert always fell(vga_hs) |-> {(not vga_hs)[*96]; vga_hs} abort not reset_n;
+
+-- assert always fell(vga_vs) |-> (y_counter = 490) and (x_counter = 0) abort not reset_n;
+-- assert always {not vga_vs; vga_vs} |-> (y_counter = 492) and (x_counter = 0) abort not reset_n;
+
+}

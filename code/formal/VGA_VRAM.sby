@@ -1,0 +1,15 @@
+[options]
+depth 20
+mode prove
+# multiclock on
+
+[engines]
+smtbmc z3
+
+[script]
+ghdl --std=08 -fpsl -frelaxed VGA_VRAM.vhd VGA_VRAM.psl -e VGA_VRAM
+prep -top VGA_VRAM
+
+[files]
+../hdl/VGA_VRAM.vhd
+../hdl/VGA_VRAM.psl

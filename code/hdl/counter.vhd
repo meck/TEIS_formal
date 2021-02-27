@@ -1,3 +1,14 @@
+--------------------------------------------------------------------------------
+-- File:             counter.vhd
+--
+-- Company:          Meck AB
+-- Engineer:         Johan Eklund
+-- Created:          01/16/21
+--
+-- Description:      Demo of formal verificaion for use
+--                   with Symbiyos, Yosys, GHDL.
+--------------------------------------------------------------------------------
+
 library IEEE;
   use IEEE.std_logic_1164.ALL;
   use IEEE.numeric_std.ALL;
@@ -19,7 +30,6 @@ end entity counter;
 
 architecture rtl of counter is
 
-  -- signal count : natural range low_val to high_val := low_val;
   signal count : natural range low_val to high_val;
 
 begin

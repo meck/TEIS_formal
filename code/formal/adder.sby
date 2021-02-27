@@ -1,0 +1,13 @@
+[options]
+depth 25
+mode prove
+
+[engines]
+smtbmc z3
+
+[script]
+ghdl --std=08 -fpsl adder.vhd -e adder
+prep -top adder
+
+[files]
+../hdl/adder.vhd

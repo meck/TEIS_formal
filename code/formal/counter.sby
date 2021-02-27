@@ -36,4 +36,4 @@ prep -top counter
 # Under [files] all files needed to to synthesize
 # the design are listed.
 [files]
-../rtl/counter.vhd
+../hdl/counter.vhd
