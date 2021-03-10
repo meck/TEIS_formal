@@ -1,0 +1,55 @@
+[*]
+[*] GTKWave Analyzer v3.3.108 (w)1999-2020 BSI
+[*] Wed Mar 10 16:37:59 2021
+[*]
+[dumpfile] "/home/meck/Libros/Utbildning/TEIS/exjob/code/formal/simple_cpu_cover/engine_0/trace2.vcd"
+[dumpfile_mtime] "Wed Mar 10 16:36:54 2021"
+[dumpfile_size] 3552
+[savefile] "/home/meck/Libros/Utbildning/TEIS/exjob/code/wavefiles/cpu.gtkw"
+[timestart] 0
+[size] 1827 989
+[pos] -857 -330
+*-3.558465 61 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 301
+[signals_width] 174
+[sst_expanded] 1
+[sst_vpaned_height] 460
+@28
+simple_vhdl_cpu.clk_50
+simple_vhdl_cpu.reset_n
+@22
+simple_vhdl_cpu.next_state[3:0]
+@200
+-
+@22
+simple_vhdl_cpu.pc_reg[7:0]
+simple_vhdl_cpu.ir[15:0]
+simple_vhdl_cpu.cpu_reg_0[15:0]
+@200
+-
+@28
+[color] 2
+simple_vhdl_cpu.bus_en_n
+[color] 2
+simple_vhdl_cpu.rd_n
+[color] 2
+simple_vhdl_cpu.we_n
+@22
+[color] 2
+simple_vhdl_cpu.addr_bus[7:0]
+[color] 2
+simple_vhdl_cpu.data_bus_in[15:0]
+[color] 2
+simple_vhdl_cpu.data_bus_out[15:0]
+@200
+-
+@22
+[color] 6
+simple_vhdl_cpu.pc[7:0]
+[color] 6
+simple_vhdl_cpu.ir_out[7:0]
+@28
+[color] 6
+simple_vhdl_cpu.cpu_state[1:0]
+[pattern_trace] 1
+[pattern_trace] 0

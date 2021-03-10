@@ -479,7 +479,7 @@ available at
 # Example 1: Counter
 
 The first example is the formal verification of simple counter, the complete
-code can be seen in the appendix, the entity and main process is:
+code can be seen in appendix A, the entity and main process is:
 
 ```{.vhdl include=../code/hdl/counter.vhd startLine=5 endLine=18}
 ```
@@ -672,7 +672,8 @@ initial_reset : assume {{not Reset_n[+]; Reset_n[+]}[+]};
 The SERE operator "`[+]`" means that the preceding statement should hold for
 one or more cycles. So the assumption is that `reset_n` will be low for one or
 more cycles, then high for one or more cycles, this whole sequence might be
-repeated one or more times.
+repeated one or more times, notice the absence of a `always` this means that
+this assumption holds from the beginning of time.
 
 ```{.bash}
 $ sby -f counter.sby
@@ -697,16 +698,223 @@ fails and we can see this represented in the waveform (@fig:c3):
 
 TODO
 
-# Example 2: TODO
+# Example 2: TEIS simple CPU
+
+As the next example we will work with the "simple CPU" from the earlier the
+earlier VHDL course. The complete code is listed in appendix B, and attached.
+
+## `vunit` file
+
+In this example we will use a separate `vunit` file for the formal statements,
+this enables doing the tests without modifying the implementation. The scope of
+this file is the same as the architecture of the component specified, I.e. we
+can access the internal signal of the component. The format is as follows:
+
+```{.vhdl}
+vunit simple_vhdl_cpu_formal (simple_vhdl_cpu(rtl))
+{
+ -- VHDL or PSL statments
+}
+```
+
+## `.sby` file
+
+In the `.sby` file is similar but includes the `vunit` file and some new syntax
+for running multiple passes of the tools with different settings.
+
+```{.ini include=../code/formal/simple_cpu.sby}
+```
+
+## Assertions and assumptions
+
+### Clock and initial reset
+
+First we set the default clock.
+
+The CPU is meant to be reset on startup so we might assume that is is. We
+repeat the assumption from the previous example
+
+```{.vhdl}
+  default clock is rising_edge(clk_50);
+
+  initial_reset : assume {{not Reset_n[+]; Reset_n[+]}[+]};
+```
 
 
-# Example 3: TODO
+### FSM states
+
+Looking at the implementations of the state machine controlling the CPU we can
+see that it should always change state every cycle, this can be checked as
+follows:
+
+```{.vhdl}
+  state_change_every_cycle : assert always reset_n ->
+      next next_state /= prev(next_state) abort not reset_n;
+```
+
+If we run verification tools:
+
+```{.bash}
+$ cd formal
+$ sby -f simple_cpu.sby
+...
+SBY 11:16:32 One or more tasks produced a non-zero return code.
+```
+
+Something failed, if we look back at the output, the induction step failed:
+
+```{.txt}
+SBY [simple_cpu_prove] engine_0.induction: ##   0:00:00  Assert failed in simple_vhdl_cpu: simple_vhdl_cpu_formal.state_change_every_cycle
+SBY [simple_cpu_prove] engine_0.induction: ##   0:00:00  Writing trace to VCD file: engine_0/trace_induct.vcd
+```
+
+Lets look at the result trace (@fig:cpu1), remember that the induction step
+works "backwards" from failed assertions, therefor the failure will always show
+in the last cycle.
+
+The values in `next_state` looks suspiciously large^[The tools does
+unfortunately not show the values of the enumerated type, but their synthesised
+representation.]. Since induction starts from all possible states, it seems to
+have started from a non valid state.
+
+![CPU Fail](cpu_fail_1.png){#fig:cpu1 width=12cm}
+
+Looking at the code we can see that the FSM logic has no default case handling.
+This can be considered a flaw. One solution is to redesign it to add one,
+perhaps using a error vector to let a running program detect and handle any
+such errors:
+
+```{.vhdl}
+-- Dont halt and catch fire
+when others =>
+                  pc_reg       <= X"FF"; -- Error vector
+                  next_state <= Fetch_1_state;
+```
+
+If the unspecified result is acceptable we can instead add an assumption to the
+fact in the `vunit`:
+
+```{.vhdl}
+assume always next_state = Fetch_1_state or
+              next_state = Fetch_2_state or
+              next_state = Fetch_3_state or
+              next_state = Decode_state or
+              next_state = Execute_NOP_state or
+              next_state = Execute_JMP_state or
+              next_state = Execute_LOAD_state or
+              next_state = Execute_STORE_state or
+              next_state = STORE_1_state or
+              next_state = STORE_2_state;
+```
+
+Either of these solutions make the verification pass.
+
+### Bus writes
+
+The `vunit` can also contain VHDL so we can add some signals which we can use
+in our PSL statements in order to make thing easier to read later, its also
+possible to put VHDL helper processes here:
+
+```{.vhdl}
+-- The current op code
+signal f_op : std_logic_vector(3 downto 0);
+f_op <= ir(15 downto 12);
+
+-- The possible address part of the current instruction
+signal f_addr : std_logic_vector(7 downto 0);
+f_addr <= ir(7 downto 0);
+
+-- The possible data part in the register
+signal f_data : std_logic_vector(15 downto 0);
+f_data <= (15 downto 8 => '0') & cpu_reg_0(7 downto 0);
+
+```
+
+What do we know about the write operations?
+
+- `we_n` shall only be low for one cycle, when the FSM is in the
+  `store_1_state`.
+
+- When `wn_n` is low the value on the address bus shall be the address part of
+  the current instruction.
+
+- When `wn_n` is low the value on `data_bus_out` bus shall be the eight data
+  bits from the CPU register.
+
+This could look as follows:
+
+```{.vhdl}
+  -- writes are only one cycle.
+  we_only_one_cycle : assert always not we_n -> next we_n;
+
+  -- check that we are in the correct state when writing
+  we_only_in_write_state : assert always reset_n and fell(we_n) -> prev(next_state) = STORE_1_state;
+
+  -- check output are correct when writing
+  write_addr_from_ir : assert not we_n -> addr_bus = f_addr;
+  write_value_from_cpu_reg : assert not we_n -> data_bus_out = f_data;
+```
+
+This should be readable by now, `fell()` is a built in PSL function that checks
+if a signal went low in the current cycle. I.e. `prev(x) and (not x)`, there is
+a corresponding `rose()` function.
+
+If we rerun the test everything passes.
+
+### Cover
+
+Sometimes you might want to prove that some condition or sequence is possible,
+this can be done using a `cover` statement. `SymbiYosys` can then be made to
+run an extra pass producing wave files demonstrating the coverage^[It also
+produces Verilog testbench files.].
+
+If we wish to inspect a load-store cycle for the CPU using a fixed value it
+might look as follows, formated for more legibility:
+
+```{.vhdl}
+l  load_store_cycle : cover { (cpu_reg_0 /= X"0AFE");
+                             (cpu_reg_0 = X"0AFE")[->];
+                             (data_bus_out = X"00FE" and we_n = '0')[->]
+                           };
+```
+
+This uses `SERE` syntax, the `[->]` operator is new, it's means goto and means
+that the condition must hold in the last cycle, in this the above statement
+could be formulated as "Start with `cpu_reg_0` not equal to `0AFE` then there
+must be a state where it is equal to `0AFE`, and later the value `00FE` must be
+present on the data bus.^[The four `A` bits are not stored] and `we_n` must be
+low".
+
+If we now run the verification we will see in the output that the `cover` task
+in the `.sby` file outputs a trace for our cover statement:
+
+```{.bash}
+SBY [simple_cpu_cover] engine_0: ##   0:00:00  Reached cover statement at simple_vhdl_cpu_formal.load_store_cycle in step 11.
+SBY [simple_cpu_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace2.vcd
+```
+
+In this trace we can see the instruction `1AFE` on `data_bus_in` being
+executed, registering the value `0AFE` to `cpu_reg_0`. And later the lower
+eight bits `00FE` being stored on the bus.
+
+![Cover load store](cpu_cover_1.png){#fig:cpu_c_1 width=12cm}
+
+
+## Summary
+
+TODO
+
+Complex test stimuly cover
 
 
 # Remarks
 
 TODO
 
+
+# Resources
+
+TODO
 
 # References
 
@@ -719,4 +927,10 @@ TODO
 
 ```{.vhdl include=../code/hdl/counter.vhd}
 ```
+
+## B. Simple CPU VHDL {-}
+
+```{.vhdl include=../code/hdl/simple_VHDL_CPU.vhd}
+```
+
 

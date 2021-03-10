@@ -4,39 +4,46 @@ vunit VGA_VRAM_formal (VGA_VRAM(rtl))
   signal f_addr : std_logic_vector(ADDR_WIDTH - 1 downto 0);
   signal f_data : std_logic_vector(DATA_WIDTH - 1 downto 0);
 
-  signal f_past_val : boolean := false;
+  signal f_past_valid : boolean := false;
 
   attribute anyconst : boolean;
   attribute anyconst of f_addr : signal is true;
 
-  signal f_clk : std_logic := '0';
+  -- signal f_clk : std_logic := '0';
 
-  attribute gclk : boolean;
-  attribute gclk of f_clk : signal is true;
+  -- attribute gclk : boolean;
+  -- attribute gclk of f_clk : signal is true;
 
-  -- signal f_half_clk : std_logic;
+  -- attribute anyseq : boolean;
+  -- attribute anyseq of f_clk : signal is true;
 
-  -- default clock is rising_edge(f_clk);
+  default clock is rising_edge(cpu_clock);
+  -- assume (always cpu_clock -> next not cpu_clock)@rising_edge(f_clk);
+
+  -- assume (always cpu_clock -> next not cpu_clock)@rising_edge(f_clk);
+  -- assume (always not cpu_clock -> next cpu_clock)@rising_edge(f_clk);
+  -- assume {{cpu_clock;not cpu_clock}[+]};
+  -- assume always (cpu_clock = f_clk)@rising_edge(f_clk);
+  assume ({{vga_clock[*2];(not vga_clock)[*2]}[+]});
 
   process is
   begin
     wait until rising_edge (cpu_clock);
       if (cpu_we_n = '0') and (cpu_address = f_addr)  then
         f_data <= cpu_data_in;
-        f_past_val <= true;
+        f_past_valid <= true;
       end if;
-      -- f_half_clk <= not f_half_clk;
   end process;
 
+  -- restrict {vga_clock = f_clk}[+];
+  -- This assumes the clocks are in phase
+  -- assume always vga_clock = not prev(vga_clock);
+  -- assume {{vga_clock; not vga_clock}[+]};
 
-  assume (always cpu_clock = not prev(cpu_clock))@rising_edge(f_clk);
-  -- assume (always vga_clock = prev(f_clk,2));
-  
-  -- assume always vga_clock = f_half_clk;
+  cover {vga_data_out = "000" ; vga_data_out = "001"; vga_data_out = "010"; vga_data_out = "011"};
 
-  -- ram_cpu_write : assert always f_past_val -> ram(to_integer(unsigned(f_addr))) = f_data;
-  -- ram_cpu_read : assert always f_past_val and cpu_address = f_addr -> next cpu_data_out = prev(f_data);
-  -- ram_vga_read : assert (always f_past_val and vga_address = f_addr -> next vga_data_out = prev(f_data))@rising_edge(vga_clock);
-  -- ram_vga_read : assert always f_past_val and vga_address = f_addr -> next vga_data_out = prev(f_data);
+  ram_cpu_write : assert (always f_past_valid -> ram(to_integer(unsigned(f_addr))) = f_data)@rising_edge(cpu_clock);
+  ram_cpu_read : assert (always f_past_valid and cpu_address = f_addr -> next cpu_data_out = prev(f_data))@rising_edge(cpu_clock);
+  ram_vga_read : assert (always f_past_valid and vga_address = f_addr -> next vga_data_out = prev(f_data))@rising_edge(vga_clock);
 
 }

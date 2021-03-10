@@ -1,0 +1,54 @@
+[*]
+[*] GTKWave Analyzer v3.3.108 (w)1999-2020 BSI
+[*] Sat Mar  6 15:56:32 2021
+[*]
+[dumpfile] "/home/meck/Libros/Utbildning/TEIS/exjob/code/formal/VGA_VRAM_prove/engine_0/trace.vcd"
+[dumpfile_mtime] "Sat Mar  6 15:47:43 2021"
+[dumpfile_size] 1846
+[savefile] "/home/meck/Libros/Utbildning/TEIS/exjob/code/wavefiles/VGA_VRAM.gtkw"
+[timestart] 0
+[size] 1406 1357
+[pos] -1 -1
+*-3.328983 4 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] VGA_VRAM.
+[sst_width] 301
+[signals_width] 261
+[sst_expanded] 1
+[sst_vpaned_height] 414
+@28
+VGA_VRAM.cpu_clock
+VGA_VRAM.vga_clock
+@200
+-
+@28
+[color] 3
+VGA_VRAM.cpu_we_n
+@22
+[color] 3
+VGA_VRAM.cpu_address[16:0]
+@28
+[color] 3
+VGA_VRAM.cpu_data_in[2:0]
+[color] 3
+VGA_VRAM.cpu_data_out[2:0]
+@200
+-
+@22
+[color] 6
+VGA_VRAM.vga_address[16:0]
+@28
+[color] 6
+VGA_VRAM.vga_data_out[2:0]
+@200
+-
+@29
+[color] 2
+VGA_VRAM.vga_vram_formal.f_past_valid
+@23
+[color] 2
+VGA_VRAM.vga_vram_formal.f_addr[16:0]
+@29
+[color] 2
+VGA_VRAM.vga_vram_formal.f_data[2:0]
+[pattern_trace] 1
+[pattern_trace] 0

@@ -7,9 +7,9 @@ pkgs.mkShell {
     # Main attractions
     ghdl-llvm
     yosys
-
-    # Proofing
     symbiyosys
+
+    # Engines
     z3
     avy
     boolector
@@ -22,7 +22,7 @@ pkgs.mkShell {
 
     # TODO symbiyosys shebangs
     # are not patched correctly
-    python3
+    # python3
 
     # Language server
     # ghdl-ls

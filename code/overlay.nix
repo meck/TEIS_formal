@@ -4,10 +4,11 @@ let
 
   # Used in GHDL and GHDL-ls
   ghdlSrc = super.fetchFromGitHub {
+    # 2021-03-05
     owner = "ghdl";
     repo = "ghdl";
-    rev = "2fb2384dbcfea0b2b6e6efe00934ccdf869d6ee6";
-    sha256 = "sha256-nlLJZ5hukAA1oH9dLFSoLmn8iLzZJ34X1e8vPlkH0L8";
+    rev = "80b41f38598931c14db30232b8b38b12186c156d";
+    sha256 = "1hznah2dgvyjshs1hijnq86irkmg56rn34rs41mabv3qq0a8xbcn";
   };
 
 in
@@ -16,7 +17,7 @@ in
   # GHDL Newer then nixpkgs
   ghdl-llvm = super.ghdl-llvm.overrideAttrs (old: rec {
 
-    version = "1.0.0";
+    version = "HEAD";
     src = ghdlSrc;
 
     doCheck = runChecks;
@@ -33,6 +34,7 @@ in
     let
 
       ghdl-yosys-plugin = super.fetchFromGitHub {
+        # 2021-01-25
         owner = "ghdl";
         repo = "ghdl-yosys-plugin";
         rev = "cba859cacf8c6631146dbdaa0f297c060b5a68cd";
@@ -58,6 +60,13 @@ in
 
 
   symbiyosys = super.symbiyosys.overrideAttrs (old: rec {
+    version = "2021.03.04";
+    src = super.fetchFromGitHub {
+      owner  = "YosysHQ";
+      repo   = "SymbiYosys";
+      rev    = "1ffef12cf1305da36c96b3f3cb20fdfacac820d2";
+      sha256 = "1dx00z6c6hjkcklxa36pzj5n71xgzqds7y1izbgqzl5abxva0ag0";
+    };
     # Symbiysys checks not working atm.
     # https://github.com/YosysHQ/SymbiYosys/pull/115
     # doCheck = true;
