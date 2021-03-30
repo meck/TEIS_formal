@@ -1,76 +1,99 @@
 self: super:
 let
-  runChecks = false;
+  runChecks = true;
+  py3 = super.pkgs.python3Packages;
 
+  # GHDL Newer version
+  # 2021-03-30
   # Used in GHDL and GHDL-ls
+  ghdlVersion = "HEAD";
   ghdlSrc = super.fetchFromGitHub {
-    # 2021-03-05
     owner = "ghdl";
     repo = "ghdl";
-    rev = "80b41f38598931c14db30232b8b38b12186c156d";
-    sha256 = "1hznah2dgvyjshs1hijnq86irkmg56rn34rs41mabv3qq0a8xbcn";
+    rev = "ef9cb64c5d334a3f0060d8245c8b77fb7daad62d";
+    sha256 = "0xpcz8sx1n9ilczpa2vsg0n9cax3j2xrbw48m1rkzsqgm7rs3isv";
+  };
+
+
+  pydecor = with py3; buildPythonPackage rec {
+    pname = "pydecor";
+    version = "2.0.1";
+    src = super.fetchFromGitHub {
+      owner = "mplanchard";
+      repo = pname;
+      rev = "v${version}";
+      sha256 = "0g064ymmk6lzgwmzh068b82ddy5chy3gwb0003pr2705dngn2mxd";
+    };
+
+    checkInputs = [ pytest ];
+    doCheck = false;
+
+    propagatedBuildInputs = [ six dill ];
+  };
+
+  pyVHDLModel = with py3; buildPythonPackage rec {
+    pname = "pyVHDLModel";
+    version = "0.8.0";
+    src = super.fetchFromGitHub {
+      owner = "VHDL";
+      repo = pname;
+      rev = "v${version}";
+      sha256 = "0bqnkk3icrwkr2zjy8hmcdymyhcv7c6337zy0d9h2slwpmxpqql5";
+    };
+
+    propagatedBuildInputs = [ pydecor ];
   };
 
 in
-{
+rec {
 
-  # GHDL Newer then nixpkgs
-  ghdl-llvm = super.ghdl-llvm.overrideAttrs (old: rec {
-
-    version = "HEAD";
+  ghdl = super.ghdl.overrideAttrs (old: rec {
+    version = ghdlVersion;
     src = ghdlSrc;
-
-    doCheck = runChecks;
-
     # https://github.com/NixOS/nixpkgs/issues/97466
     propagatedBuildInputs = [ super.zlib ];
 
+    doCheck = runChecks;
+    checkInputs = [ (super.python3.withPackages (ps: with ps; [ pytest pydecor pyVHDLModel ])) ];
+    # https://github.com/ghdl/ghdl/issues/1255
+    preCheck = old.preCheck or "" + ''
+      make install.vpi.local
+      patchShebangs  ./testsuite
+    '';
+
+  });
+
+  # Newer version
+  yosys-ghdl = super.yosys-ghdl.overrideAttrs (old: rec {
+    src = super.fetchFromGitHub {
+      owner = "ghdl";
+      repo = "ghdl-yosys-plugin";
+      rev = "98f4594b67ef650b115653185022e46876fb08ce";
+      sha256 = "0gv2329dizwa4dxk6sgr7015bsjy5r48vmx22yfk5zy7r7whgxwi";
+    };
   });
 
 
-  # Yosys with plugin for synthesizing
-  # GHDL output
-  yosys =
-    let
+  # Wrap to not have to do "-m ghdl"
+  yosys = super.symlinkJoin {
+    name = "yosys";
+    paths = [ super.yosys ];
+    buildInputs = [ super.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/yosys \
+        --add-flags "-m ghdl"
+    '';
+  };
 
-      ghdl-yosys-plugin = super.fetchFromGitHub {
-        # 2021-01-25
-        owner = "ghdl";
-        repo = "ghdl-yosys-plugin";
-        rev = "cba859cacf8c6631146dbdaa0f297c060b5a68cd";
-        sha256 = "01d9wb7sqkmkf2y9bnn3pmhy08khzs5m1d06whxsiwgwnjzfk9mx";
-      };
-
-    in
-    super.yosys.overrideAttrs (old: rec {
-
-      # Build Yosys with plugin
-      # then `-m ghdl` is not needed
-      postPatch = old.postPatch + ''
-        mkdir -p frontends/ghdl
-        cp -r ${ghdl-yosys-plugin}/src/* frontends/ghdl/
-      '';
-
-      makeFlags = old.makeFlags
-        ++ [ "ENABLE_GHDL=1" "GHDL_PREFIX=${self.ghdl-llvm}" ];
-
-      doCheck = runChecks;
-    });
-
-
-
+  # Newer version
   symbiyosys = super.symbiyosys.overrideAttrs (old: rec {
     version = "2021.03.04";
     src = super.fetchFromGitHub {
-      owner  = "YosysHQ";
-      repo   = "SymbiYosys";
-      rev    = "1ffef12cf1305da36c96b3f3cb20fdfacac820d2";
-      sha256 = "1dx00z6c6hjkcklxa36pzj5n71xgzqds7y1izbgqzl5abxva0ag0";
+      owner = "YosysHQ";
+      repo = "SymbiYosys";
+      rev = "4db5d70c349a74c7febccb82671dcd75497b6c6c";
+      sha256 = "1r5rj8af6xgy499zp3x5k7vk6w27c2b654wgc9479llsl0flqaqs";
     };
-    # Symbiysys checks not working atm.
-    # https://github.com/YosysHQ/SymbiYosys/pull/115
-    # doCheck = true;
-    # checkInputs = old.checkInputs ++ [ self.super_prove super.avy super.btor2tools];
   });
 
   # Super Prove
@@ -110,50 +133,19 @@ in
 
 
   # GHDL Language server and deps
-  ghdl-ls = with super.pkgs.python3Packages;
-    let
-      pydecor = buildPythonPackage rec {
-        pname = "pydecor";
-        version = "2.0.1";
-        src = super.fetchFromGitHub {
-          owner = "mplanchard";
-          repo = pname;
-          rev = "v${version}";
-          sha256 = "0g064ymmk6lzgwmzh068b82ddy5chy3gwb0003pr2705dngn2mxd";
-        };
+  ghdl-ls = with py3; buildPythonPackage rec {
 
-        doCheck = false;
+    name = "ghdl-ls";
+    src = ghdlSrc;
+    propagatedBuildInputs = [ pyVHDLModel pydecor ];
+    buildInputs = [ self.ghdl ];
 
-        propagatedBuildInputs = [ six dill ];
-      };
+    # Dont build GHDL
+    dontConfigure = true;
 
-      pyVHDLModel = buildPythonPackage rec {
-        pname = "pyVHDLModel";
-        version = "0.8.0";
-        src = super.fetchFromGitHub {
-          owner = "VHDL";
-          repo = pname;
-          rev = "v${version}";
-          sha256 = "0bqnkk3icrwkr2zjy8hmcdymyhcv7c6337zy0d9h2slwpmxpqql5";
-        };
-
-        propagatedBuildInputs = [ pydecor ];
-      };
-
-
-    in
-    buildPythonPackage rec {
-
-      name = "ghdl-ls";
-      src = ghdlSrc;
-      propagatedBuildInputs = [ pyVHDLModel pydecor ];
-      buildInputs = [ self.ghdl-llvm ];
-
-      # Dont build GHDL
-      dontConfigure = true;
-
-      # For shared lib
-      checkInputs = [ self.ghdl-llvm ];
-    };
+    # For shared lib
+    doCheck = runChecks;
+    checkInputs = [ self.ghdl ];
+  };
 
 }

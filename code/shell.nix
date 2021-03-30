@@ -7,6 +7,7 @@ pkgs.mkShell {
     # Main attractions
     ghdl-llvm
     yosys
+    yosys-ghdl
     symbiyosys
 
     # Engines
@@ -20,12 +21,8 @@ pkgs.mkShell {
     graphviz
     gnumake
 
-    # TODO symbiyosys shebangs
-    # are not patched correctly
-    # python3
-
     # Language server
-    # ghdl-ls
+    ghdl-ls
 
   ];
 }
