@@ -4,14 +4,14 @@ let
   py3 = super.pkgs.python3Packages;
 
   # GHDL Newer version
-  # 2021-03-30
+  # 2021-06-08
   # Used in GHDL and GHDL-ls
   ghdlVersion = "HEAD";
   ghdlSrc = super.fetchFromGitHub {
     owner = "ghdl";
     repo = "ghdl";
-    rev = "ef9cb64c5d334a3f0060d8245c8b77fb7daad62d";
-    sha256 = "0xpcz8sx1n9ilczpa2vsg0n9cax3j2xrbw48m1rkzsqgm7rs3isv";
+    rev = "f66524bb94be8ca7850565f5d0346a8aba5c5ea1";
+    sha256 = "0h9jv8swlzxj28c9a5v66hri56zdvdjddjkbswmgd01z99prf53v";
   };
 
 

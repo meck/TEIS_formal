@@ -1,9 +1,9 @@
-# let
-#   nixpkgs = builtins.fetchTarball {
-#     name = "nixpkgs-unstable-2021-03-04";
-#     url =
-#       "https://github.com/nixos/nixpkgs/archive/d496205cf22c3079461d868ea3198d42ded59287.tar.gz";
-#     sha256 = "1yjsapz3q6gc3ckd5cf4dwjqh94y9wpn0gjp69jr2zr8ibnbgp25";
-#   };
-# in (import nixpkgs) { overlays = [ (import ./overlay.nix) ]; }
-import <nixpkgs> { overlays = [ (import ./overlay.nix) ]; }
+let
+  nixpkgs = (builtins.fetchTarball {
+    name = "nixpkgs-unstable-2021-06-08";
+    url =
+      "https://github.com/nixos/nixpkgs/archive/3bc8e5cd23b84b2e149e7aaad57117da16a19e6f.tar.gz";
+    sha256 = "16h0a45ncrjf3hcpqbkflmzfijgq2skkick6g2pr9ksy1rg0h6rb";
+  });
+in
+(import nixpkgs) { overlays = [ (import ./overlay.nix) ]; }

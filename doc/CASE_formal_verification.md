@@ -31,7 +31,7 @@ software. Recent advances in some open-source software has lowered the entry
 barrier greatly, some of these tools are connected to other FPGA open-source
 project^[synthesis, place and route and bitstream generation]. Many of these
 projects primary use Verilog as the HDL of choice, however this project looks
-at using the tools with VHDL.
+at using VHDL.
 
 The HDL language chosen needs to be augmented with another language to
 accurately be able to describe the temporal aspects of the design for the
@@ -139,7 +139,7 @@ done with $k_{bmc} \leq k_{ind}$, if this passes the following is known:
 
 ## Workflow
 
-The main workflow for these tools can be summarized:
+The main workflow for these tools can be summarized as follows:
 
 1. **Run Bounded Check**
    + `FAIL` $\Rightarrow$ Fix design, add assumptions, or loosen asserts
@@ -168,11 +168,6 @@ from the top level:
    - **Assume inputs** Remove inputs that are known to never happen.
      If to much is assumed, the design might pass and still
      have errors^[Or the saying "Assumptions are the mother of all F***ups"].
-
-### Depth
-
-TODO depth inportance
-
 
 
 # Property Specification Language
@@ -391,8 +386,6 @@ The tool are Linux based but the workflow is possible to run on other systems:
 - **Windows 10:** Using 'Windows Subsystem for Linux', its recommended to use a
   up to date Windows10 and WSL2:
   [`docs.microsoft.com/en-us/windows/wsl/install-win10`](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
-- **macOS:** Using the nix method described below this should be possible as well, but is
-  not verified. TODO
 
 
 #### Optional
@@ -406,8 +399,6 @@ The tool are Linux based but the workflow is possible to run on other systems:
 
 
 ## Installation
-
-TODO mention docker setup
 
 ### Nix setup
 
@@ -471,8 +462,7 @@ some parts are fetched and some are built from source]:
       ```
 
 A alternative way of simplifying setting up a environment is by use of docker
-containers ,this is not covered here, but for anyone interested containers are
-available at
+containers ,this is not covered here, but containers are available at
 [`https://hdl.github.io/containers/`](https://hdl.github.io/containers/).
 
 
@@ -696,19 +686,21 @@ fails and we can see this represented in the waveform (@fig:c3):
 
 ## Summary
 
-TODO
+This example shows a overview of the basic setup for a formal test and some
+common pitfalls and solutions to these
 
 # Example 2: TEIS simple CPU
 
-As the next example we will work with the "simple CPU" from the earlier the
-earlier VHDL course. The complete code is listed in appendix B, and attached.
+As the next example we will examine the "simple CPU" from the VHDL course. The
+complete code is listed in appendix B and attached.
 
 ## `vunit` file
 
-In this example we will use a separate `vunit` file for the formal statements,
-this enables doing the tests without modifying the implementation. The scope of
-this file is the same as the architecture of the component specified, I.e. we
-can access the internal signal of the component. The format is as follows:
+In this example we will use a separate `vunit` file for the formal PSL
+statements, this enables doing tests without modifying the implementation. The
+scope of this file is the same as the architecture of the component specified,
+I.e. we can access the internal signal of the component. The format is as
+follows:
 
 ```{.vhdl}
 vunit simple_vhdl_cpu_formal (simple_vhdl_cpu(rtl))
@@ -719,8 +711,10 @@ vunit simple_vhdl_cpu_formal (simple_vhdl_cpu(rtl))
 
 ## `.sby` file
 
-In the `.sby` file is similar but includes the `vunit` file and some new syntax
-for running multiple passes of the tools with different settings.
+The `.sby` file is similar to earlier ones but includes the `vunit` file and
+some new syntax for running multiple passes of the tools with different
+settings, we run a "prove" task equivalent to previous example and also a
+"cover" task described in its own chapter.
 
 ```{.ini include=../code/formal/simple_cpu.sby}
 ```
@@ -744,15 +738,15 @@ repeat the assumption from the previous example
 ### FSM states
 
 Looking at the implementations of the state machine controlling the CPU we can
-see that it should always change state every cycle, this can be checked as
-follows:
+see that it should always change state every cycle, this can be verified in the
+following manner:
 
 ```{.vhdl}
   state_change_every_cycle : assert always reset_n ->
       next next_state /= prev(next_state) abort not reset_n;
 ```
 
-If we run verification tools:
+If we now run verification tools:
 
 ```{.bash}
 $ cd formal
@@ -785,14 +779,14 @@ perhaps using a error vector to let a running program detect and handle any
 such errors:
 
 ```{.vhdl}
--- Dont halt and catch fire
+-- Don't halt and catch fire
 when others =>
                   pc_reg       <= X"FF"; -- Error vector
                   next_state <= Fetch_1_state;
 ```
 
-If the unspecified result is acceptable we can instead add an assumption to the
-fact in the `vunit`:
+Or if the unspecified result is acceptable we can instead add an assumption to
+the fact in the `vunit`:
 
 ```{.vhdl}
 assume always next_state = Fetch_1_state or
@@ -811,8 +805,8 @@ Either of these solutions make the verification pass.
 
 ### Bus writes
 
-The `vunit` can also contain VHDL so we can add some signals which we can use
-in our PSL statements in order to make thing easier to read later, its also
+The `vunit` file can also contain VHDL so we can add some signals which we can
+use in our PSL statements in order to make thing easier to read later, its also
 possible to put VHDL helper processes here:
 
 ```{.vhdl}
@@ -861,7 +855,7 @@ a corresponding `rose()` function.
 
 If we rerun the test everything passes.
 
-### Cover
+## Cover
 
 Sometimes you might want to prove that some condition or sequence is possible,
 this can be done using a `cover` statement. `SymbiYosys` can then be made to
@@ -878,43 +872,43 @@ l  load_store_cycle : cover { (cpu_reg_0 /= X"0AFE");
                            };
 ```
 
-This uses `SERE` syntax, the `[->]` operator is new, it's means goto and means
-that the condition must hold in the last cycle, in this the above statement
-could be formulated as "Start with `cpu_reg_0` not equal to `0AFE` then there
-must be a state where it is equal to `0AFE`, and later the value `00FE` must be
-present on the data bus.^[The four `A` bits are not stored] and `we_n` must be
-low".
+This uses `SERE` syntax, the `[->]` operator is new, it means "goto" and
+implies that the condition must hold in the last cycle, in this the above
+statement could be formulated as "Start with `cpu_reg_0` not equal to `0AFE`
+then there must be a state where it is equal to `0AFE`, and later the value
+`00FE` must be present on the data bus.^[The four `A` bits are not stored] and
+`we_n` must be low".
 
 If we now run the verification we will see in the output that the `cover` task
 in the `.sby` file outputs a trace for our cover statement:
 
-```{.bash}
+```{.txt}
 SBY [simple_cpu_cover] engine_0: ##   0:00:00  Reached cover statement at simple_vhdl_cpu_formal.load_store_cycle in step 11.
 SBY [simple_cpu_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace2.vcd
 ```
 
 In this trace we can see the instruction `1AFE` on `data_bus_in` being
 executed, registering the value `0AFE` to `cpu_reg_0`. And later the lower
-eight bits `00FE` being stored on the bus.
+eight bits `00FE` being written to the bus.
 
-![Cover load store](cpu_cover_1.png){#fig:cpu_c_1 width=12cm}
+![Cover load-store cycle](cpu_cover_1.png){#fig:cpu_c_1 width=12cm}
 
 
 ## Summary
 
-TODO
+This example show in a simple fashion some ways of using formal verification to
+discover and correct bugs or possible deficiencies in a design. The test
+coverage is in no way complete but could be a starting point for further tests.
 
-Complex test stimuly cover
+Cover statements are demonstrated and they might be useful in order to
+demonstrate particular states and flows in the design.
 
 
 # Remarks
 
-TODO
+We hope this document can pique the intresset for open source formal
+verification and serve as a starting point for using the tools above.
 
-
-# Resources
-
-TODO
 
 # References
 

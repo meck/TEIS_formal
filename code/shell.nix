@@ -15,7 +15,7 @@ pkgs.mkShell {
     avy
     boolector
     yices
-    super_prove
+    # super_prove
 
     # Misc
     graphviz
