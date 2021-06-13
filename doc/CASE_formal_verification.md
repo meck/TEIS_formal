@@ -216,9 +216,9 @@ assert always PRECONDITION -> CONDITION;
 :   `never` shall never hold
 
 
----
+\pagebreak
 
-**There is also "SERE" syntax:**
+**PSL also has an alternative syntax, "SERE":**
 
 ```{.vhdl}
 {CONDITION_A;CONDITION_B}
@@ -229,7 +229,7 @@ something in the following cycle. These can be modified further e.g.
 `{a[*5];b;c}` means `a` must hold for 5 cycles, then `b` for one cycle and then
 `c` for one cycle.
 
-SERE also includes the operators `|->` and `|=>`
+SERE syntax also includes the operators `|->` and `|=>`
 
 ```{.vhdl}
 {a;b} |-> {c}
@@ -406,8 +406,9 @@ In order to facilitate easy installation of the required software a custom
 setup using the **Nix**^[Nix is among other things a package manager that
 allows setting up a per project shell environment that is independent of the
 operating system] package manager[@nix_web] has been constructed along with
-examples in this guide. This consist of the `.nix` files in TODO directory.
-This is also made available as GitHub repository TODO.
+examples in this guide. This consist of the `.nix` files in git repository
+[`github.com/meck/TEIS_formal`](https://github.com/meck/TEIS_formal). This
+source is also attached to the CASE-file.
 
 These files declaratively describes a shell environment using working versions
 of all required software, **Nix** is a completely separate subject, but this
@@ -415,46 +416,47 @@ should make the installation which is fairly advanced possible for users with
 limited knowledge.
 
 
-1. At the time of writing nix can be installed as follows (but check the
-   website for any updates), then follow the instructions:
+#. At the time of writing nix can be installed as follows (but check the
+   nix website for any updates[@nix_web]):
 
       ``` .bash
       $ curl -L https://nixos.org/nix/install | sh
       ```
 
-2. Download the examples and nix setup, or skip this and copy the attached
+#. Download the examples and nix setup, or skip this and copy the attached
    files:
 
       ``` .bash
-      $ git clone TODO
+      $ git clone https://github.com/meck/TEIS_formal.git
       ```
 
-3. Enter the project directory can then be entered
+#. Enter the project directory
 
       ``` .bash
-      $ cd TODO/TODO
+      $ cd TEIS_formal/code
       ```
 
-4. Start the Nix environment with the following command ^[This might take a while the first time,
+#. Start the Nix environment with the following command ^[This might take a while the first time,
 some parts are fetched and some are built from source]:
 
       ``` .bash
       $ nix-shell
       ```
 
-5. Now the tools should be executable:
+#. Now the tools should be executable:
 
       ``` .bash
       $ ghdl --version
-      GHDL 1.0-dev () [Dunoon edition]
+      GHDL 1.0.0 (tarball) [Dunoon edition]
        Compiled with GNAT Version: 9.3.0
        llvm code generator
       Written by Tristan Gingold.
+
+      Copyright (C) 2003 - 2021 Tristan Gingold.
+      GHDL is free software, covered by the GNU General Public License.  There is NO
+      warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
       ...
 
-      $ yosys --version
-      Yosys 0.9+3830 (git sha1 b72c294653, g++ 10.2.0 -fPIC -Os)
-      ...
 
       $ sby --help
       usage: sby [options] [<jobname>.sby [tasknames] | <dirname>]
@@ -471,10 +473,10 @@ containers ,this is not covered here, but containers are available at
 The first example is the formal verification of simple counter, the complete
 code can be seen in appendix A, the entity and main process is:
 
-```{.vhdl include=../code/hdl/counter.vhd startLine=5 endLine=18}
+```{.vhdl include=../code/hdl/counter.vhd startLine=16 endLine=29}
 ```
 
-```{.vhdl include=../code/hdl/counter.vhd startLine=27 endLine=44}
+```{.vhdl include=../code/hdl/counter.vhd startLine=37 endLine=52}
 ```
 
 The PSL statement are wrapped as a VHDL `generate` section controlled by a
@@ -483,10 +485,9 @@ for hardware etc.
 
 ## `.sby` file
 
-To be able to do a formal verification SymbiYosys needs a `.sby` file script
-this is located in TODO folder and looks as follows, the file is described in
-the comments, the complete syntax is described at the SymbiYosys website
-@symbiyosys:
+To be able to do a formal verification SymbiYosys needs a `.sby` script this is
+located in `code/formal` folder and looks as follows, the file is described in
+the comments, complete syntax is described at the SymbiYosys website @symbiyosys:
 
 ```{.ini include=../code/formal/counter.sby}
 ```
@@ -519,7 +520,7 @@ counterexample is also generated in case of failure].
 
 ### Saturation
 
-Now we can start to add assertions, firstly we add a default clock then we
+Now we can start to add assertions, first we add a default clock, then we
 assert that the counter should not change when saturated, The `stable()`
 function checks that a signal has not changed since the previous cycle:
 
@@ -542,7 +543,7 @@ $ sby -f counter.sby
 [counter] DONE (FAIL, rc=2)
 ```
 
-Failure? Let's open the counterexample^[If using GtkWave: "`gtkwave
+Failure? Let's open the counterexample^[Using GtkWave: "`gtkwave
 counter/engine_0/trace.vcd &`"] and look at the trace (@fig:c1):
 
 ![Counter Fail](count_fail_1.png){#fig:c1 width=4cm}
@@ -559,7 +560,7 @@ be added to the statements making the tool disregard this assertion if a
    next stable(count_out) abort not reset_n;
 ```
 
-This fixes the problem:
+Now the verification passes:
 
 ```{.bash}
 $ sby -f counter.sby
@@ -571,7 +572,7 @@ $ sby -f counter.sby
 
 Next we add an assertion regarding the `enable` signal, whenever `enable` is
 low the output shall remain unchanged. `until_` is a operator that means that
-the condition shall hold until the right hand condition is met. The underscore
+the condition shall hold until the right-hand condition is met. The underscore
 suffix means that the cycle when enable goes high should be included, there is
 a corresponding `until`. This is common pattern in PSL functions.
 
@@ -585,7 +586,7 @@ a corresponding `until`. This is common pattern in PSL functions.
 The next section asserts that the output counts up and down as it should. The
 `prev()` function references the signal value of the previous cycle, since the
 right hand side of the implies operator (`->`) starts with `next` the `prev()`
-refers to the cycle when the left side condition was true ie. the previous
+refers to the cycle when the left side condition was true I.e. the previous
 cycle.
 
 ```{.vhdl}
@@ -866,10 +867,10 @@ If we wish to inspect a load-store cycle for the CPU using a fixed value it
 might look as follows, formated for more legibility:
 
 ```{.vhdl}
-l  load_store_cycle : cover { (cpu_reg_0 /= X"0AFE");
-                             (cpu_reg_0 = X"0AFE")[->];
-                             (data_bus_out = X"00FE" and we_n = '0')[->]
-                           };
+load_store_cycle : cover { cpu_reg_0 /= X"0AFE";
+                           cpu_reg_0 = X"0AFE";
+                           data_bus_out = X"00FE" and we_n = '0'[->]
+                         };
 ```
 
 This uses `SERE` syntax, the `[->]` operator is new, it means "goto" and
@@ -924,7 +925,7 @@ verification and serve as a starting point for using the tools above.
 
 ## B. Simple CPU VHDL {-}
 
-```{.vhdl include=../code/hdl/simple_VHDL_CPU.vhd}
+```{.vhdl include=../code/hdl/simple_VHDL_CPU.vhd startLine=1 endLine=210}
 ```
 
 

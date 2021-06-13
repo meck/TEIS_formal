@@ -47,9 +47,9 @@ vunit simple_vhdl_cpu_formal (simple_vhdl_cpu(rtl))
   write_value_from_cpu_reg : assert not we_n -> data_bus_out = f_data;
 
   -- Cover statement
-  load_store_cycle : cover { (cpu_reg_0 /= X"0AFE");
-                             (cpu_reg_0 = X"0AFE")[->];
-                             (data_bus_out = X"00FE" and we_n = '0')[->]
+  load_store_cycle : cover { cpu_reg_0 /= X"0AFE";
+                             cpu_reg_0 = X"0AFE";
+                             data_bus_out = X"00FE" and we_n = '0'[->]
                            };
 
-  }
+}
