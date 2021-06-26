@@ -1,18 +1,16 @@
 ---
-title: "Formal Verification of HDL designs"
-date: TODO
+title: "Formal verification of HDL designs"
+date: 2021-06-26
 subtitle: "Using VHDL, PSL and open-source tools."
 titlepage: true
 header-includes: |
     \usepackage{sectsty}
     \sectionfont{\clearpage}
-abstract: |
-  TODO
 ---
 
 # Background
 
-The promise of formal verification is to be able to mathematically prove
+The promise of formal verification is to be able to mathematically prove some
 aspects about a design. These methods can be applied to a design either in a
 construction phase in order to find bugs or as a verification of a completed
 design. Formal verification can be used both as a complement to verification
@@ -35,8 +33,8 @@ at using VHDL.
 
 The HDL language chosen needs to be augmented with another language to
 accurately be able to describe the temporal aspects of the design for the
-verification tools. For this chosen the PSL language as seems to be the option
-most closely related to VHDL.
+verification tools. For this document the PSL language was chosen as this is
+the option most closely related to VHDL.
 
 
 It should be noted that the author is a beginner and this an exploration and
@@ -48,7 +46,7 @@ one of many possible techniques for formal verification.
 
 A HDL design after synthesis can be viewed in its whole as a Finite State
 Machine, completely represented by its current state and all its
-inputs^[including any clock] as transitions. This then represent all possible
+inputs^[including any clock] as transitions. This represents all possible
 states of a design, probably only some of these states are **valid states**
 where the design works as expected, this is implicit, this state space will
 also contain the designs **initial** state.
@@ -76,10 +74,9 @@ possible states, as shown in @fig:st_2.
 ![Assumed states](states_2.png){#fig:st_2 width=6cm}
 
 The goal of writing a formal proof is by **asserting** to make sure any
-transition from a valid is either to a implicit valid state or a explicit
-invalid state, **not** to a possible, undefined state. And by **assuming**
-shrinking the possible state space until only valid and invalid states remain,
-see @fig:st_3
+transition from a valid is either to a valid state, not to a explicit invalid
+state or a undefined state. And by **assuming** shrinking the
+possible state space until only valid and invalid states remain, see @fig:st_3
 
 ![Goal](states_3.png){#fig:st_3 width=4cm}
 
@@ -111,8 +108,8 @@ will never enter a invalid state the next step is used.
 This part can be illustrated in the following way, The solver looks at the
 states that are asserted and invalid, from there it steps "backward" to see if
 it will reach an invalid stage within $k_{ind}$ cycles @fig:ind_1. If this
-holds for all invalid states, this means that **when starting from any valid
-state the following $k_{ind}$ states will always be valid**.
+holds for all invalid states, this means that **any sequence of $k_{ind}$
+valid states will always be followed by a valid state**.
 
 ![Successfull induction](ind_1.png){#fig:ind_1 width=4cm}
 
@@ -130,7 +127,7 @@ This is what the tools does; BMC is the base case, the induction step is then
 done with $k_{bmc} \leq k_{ind}$, if this passes the following is known:
 
 1. **no invalid state is reachable within $k_{bmc}$ steps**
-2. **when starting from any valid state the following $k_{ind}$ states will always be valid**
+2. **any sequence of $k_{ind}$ valid states will always be followed by a valid state**
 3. this means that $k_{bmc} + 1$ must be valid and recursively also $k_{bmc} +
    1 + 1$ etc. So all states reachable^[all possible states excluding assumed
    invalid states] from the initial state must be valid, I.e. **the design
@@ -464,7 +461,7 @@ some parts are fetched and some are built from source]:
       ```
 
 A alternative way of simplifying setting up a environment is by use of docker
-containers ,this is not covered here, but containers are available at
+containers ,this is not covered here, tool containers are available at
 [`https://hdl.github.io/containers/`](https://hdl.github.io/containers/).
 
 
@@ -485,9 +482,10 @@ for hardware etc.
 
 ## `.sby` file
 
-To be able to do a formal verification SymbiYosys needs a `.sby` script this is
+To be able to do a formal verification SymbiYosys needs a `.sby` file this is
 located in `code/formal` folder and looks as follows, the file is described in
-the comments, complete syntax is described at the SymbiYosys website @symbiyosys:
+the comments, complete syntax is described at the SymbiYosys website
+@symbiyosys:
 
 ```{.ini include=../code/formal/counter.sby}
 ```
@@ -698,7 +696,7 @@ complete code is listed in appendix B and attached.
 ## `vunit` file
 
 In this example we will use a separate `vunit` file for the formal PSL
-statements, this enables doing tests without modifying the implementation. The
+statements, this enables adding tests without modifying the implementation. The
 scope of this file is the same as the architecture of the component specified,
 I.e. we can access the internal signal of the component. The format is as
 follows:
@@ -715,7 +713,7 @@ vunit simple_vhdl_cpu_formal (simple_vhdl_cpu(rtl))
 The `.sby` file is similar to earlier ones but includes the `vunit` file and
 some new syntax for running multiple passes of the tools with different
 settings, we run a "prove" task equivalent to previous example and also a
-"cover" task described in its own chapter.
+"cover" task (described in its own chapter).
 
 ```{.ini include=../code/formal/simple_cpu.sby}
 ```
@@ -875,10 +873,11 @@ load_store_cycle : cover { cpu_reg_0 /= X"0AFE";
 
 This uses `SERE` syntax, the `[->]` operator is new, it means "goto" and
 implies that the condition must hold in the last cycle, in this the above
-statement could be formulated as "Start with `cpu_reg_0` not equal to `0AFE`
-then there must be a state where it is equal to `0AFE`, and later the value
-`00FE` must be present on the data bus.^[The four `A` bits are not stored] and
-`we_n` must be low".
+statement could be formulated as:
+
+> "Start with `cpu_reg_0` not equal to `0AFE` then there must be a state where
+> it is equal to `0AFE`, and later the value `00FE` must be present on the data
+> bus.^[The four `A` bits are not stored] and `we_n` must be low".
 
 If we now run the verification we will see in the output that the `cover` task
 in the `.sby` file outputs a trace for our cover statement:

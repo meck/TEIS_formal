@@ -1,6 +1,6 @@
 ---
-title: "Formal Verification of an HLS component"
-date: TODO
+title: "Construction of a CASE for formal verification"
+date: 2021-06-26
 subtitle: "Using open-source tools, VHDL and PSL"
 titlepage: true
 abstract: |
@@ -135,7 +135,7 @@ TODO
 +---------------------------+---------------------------+------------+
 | ***Konstruktionskod***    |                           |            |
 +---------------------------+---------------------------+------------+
-| 1                         | Som är definierat i VHDL- |            |
+| 1                         | Som är definierat i VHDL- | JA         |
 |                           | och C-kursen              |            |
 +---------------------------+---------------------------+------------+
 | ***Dokumentationskrav och |                           |            |
@@ -156,7 +156,7 @@ TODO
 |                           |                           |            |
 |                           |     b.  Max 30 sidor      |            |
 +---------------------------+---------------------------+------------+
-| 3                         | Presentation av resultat; |            |
+| 3                         | Presentation av resultat; | N/A        |
 |                           | Skapa en film, max 10     |            |
 |                           | minuter (lägg upp den på  |            |
 |                           | Youtube),                 |            |
@@ -305,10 +305,6 @@ The requirement specification for the project is shown in @tbl:req_pro
 :Requirement specification  {#tbl:req_pro}
 
 
-# Definitions
-
-TODO
-
 # Project plan
 
 In @tbl:time is outlined a time plan estimate for the project.
@@ -329,33 +325,108 @@ In @tbl:time is outlined a time plan estimate for the project.
 
 :Time plan outline {#tbl:time}
 
-# Result
+## Result
 
-TODO
+The work on the CASE document was halted mostly due to **LIA** related work
+and some obstacles in the tooling, but was finished after the conclusion of the
+**LIA**.
+
+The total time budget was exceeded by approximately 10 hours, for a total of
+170 hours. At a rate of **800 SEK** the project would incur a cost of **144000 SEK**
 
 
-# Construction
+# Construction of CASE
 
-TODO
+## Preparatory research
 
-# Analysis
+The first part of the work consisted of studying and understanding the theory
+behind the methods and tooling used. This work consisted of reading the
+available documentation of the used tools and also some relevant blog posts
+from people whom have used these tools, see @ghdl @yosys @symbiyosys
+@yosys-ghdl @zipCpu_blog. 
 
-TODO
+Some studying of the PSL language was also undertaken using resources such as
+@psl_doulos and @psl_tutorial
+
+
+## Tooling setup
+
+As the tooling involved consists of multiple Linux based programs some time was
+spent configuring up a reproduceable environment to facilitate easy setup for
+anyone wanting to run the examples in the CASE.
+
+
+##  Examples
+
+Next multiple examples was developed and explored for possible inclusion in the
+CASE. The of including a formal verification of the TEIS VGA component was not
+achieved due to issues explained a later chapter, It was replaced by a formal
+verification example of the TEIS "Simple CPU"
+
+
+### Counter Component
+
+In order to demonstrate the basic functionally of the tools a simple example
+with a generic counter component was developed. This shows some basic tool
+setup and the basics of assertions and assumptions.
+
+
+### TEIS VGA Component and Issues
+
+One of the goals of the project was to formally verify the TEIS VGA Component.
+However this proved difficult as the tooling (GHDL in particular) support for
+multiple clocks was immature. This was investigated and reported to the GHDL
+project [@ghdl_issue] and a initial fix was implemented, but to correctly use
+multiple clocks further work is needed. For this reason further work this
+example was canceled.
+
+
+
+### TEIS Simple CPU Component
+
+Instead of the VGA Component example another example using the "TEIS Simple
+CPU" was constructed in order to show some more advanced features of the tools.
+
+
+## Requirements
+
+The partly completed requirement specification for the project is shown in
+@tbl:req_com
+
++--------------------+-------------------------------------------------------------------------------------+--------+
+| **Requirement ID** | **Description**                                                                     | OK     |
++--------------------+-------------------------------------------------------------------------------------+--------+
+| **1**              | Report with theoretical background and summary of PSL, tooling.                     | OK     |
++--------------------+-------------------------------------------------------------------------------------+--------+
+| **2**              | A reproducible CASE document describing for formal verification of a VGA Component. | Partly |
++--------------------+-------------------------------------------------------------------------------------+--------+
+| **3**              | CASE shall include tooling setup.                                                   | OK     |
++--------------------+-------------------------------------------------------------------------------------+--------+
+| **4**              | CASE shall include a brief description of tools and PSL language used.              | OK     |
++--------------------+-------------------------------------------------------------------------------------+--------+
+
+:Completed requirement specification  {#tbl:req_com}
+
 
 # Conclusions
 
-TODO
+This was a very interesting and challenging project, the goal of in the CASE
+document include a formal verification of a VGA component was not reached
+because of the issues described earlier.
+
+The CASE document hopefully shows some advantages and disadvantages of the
+technique of formal verification and is a description of the current state of
+the open source tools.
+
+The author hopes that the document might be used as starting point for anyone
+interested in formal verification. 
 
 ## Possible Improvements
 
-
 TODO
 
+\pagebreak
 
-# References
+# References {-}
 
 <div id="refs"></div>
-
-# Attachments {-}
-
-## Appendix A

@@ -2,6 +2,15 @@
 references:
 # Exjob {{{
 
+  - id: ghdl_issue
+    title: 'Reported issue ghdl'
+    type: Webpage
+    issued:
+      year: 2021
+      month: 06
+      day: 26
+    URL: "https://github.com/ghdl/ghdl/issues/1610"
+
   - id: wiki_smt
     title: 'Wikipedia SMT'
     type: Webpage
